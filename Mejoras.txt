@@ -1,0 +1,13 @@
+PELISALACARTA VERSION PARA BLUSENS.
+
+Mejoras version 3.9.9901:
+ - Guardar ajustes (Mejora del comportamiento y velocidad)
+ - Tempalte generico (Actualizacion basada en tempalte para blusens)
+ - Actualizacion de canales (Ahora los canales se actualizan automaticamente, y se añaden los nuevos cuando se modifican en el repositorio)
+ - Actualizacion pelisalacarta (Ahora se puede actualizar pelisalacarta desde el navegador sin necesidad de tocar el jail)
+ - Estabilidad (Mejoras de estabilidad y velocidad)
+ - Websocket (Corregidos algunos errores que producian que se colgara)
+
+Mejoras version 3.9.9905:
+ - Soporte para MEGA
+ - Soporte para Torrent
