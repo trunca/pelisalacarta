@@ -28,30 +28,39 @@
         <replaceregexp file="pelisalacarta/version.xml" match="&lt;date&gt;(.*?)&lt;/date&gt;" replace="&lt;date&gt;${versiondate}&lt;/date&gt;"/>
         <replaceregexp file="pelisalacarta/version.xml" match="&lt;changes&gt;(.*?)&lt;/changes&gt;" replace="&lt;changes&gt;${versionchanges}&lt;/changes&gt;"/>
         <mkdir dir="${target}/tmp"/>
+        
+        <antcall target="copy-applications"/>
+        <zip destfile="${target}/applications.zip" basedir="${target}/tmp"/>
+        
         <antcall target="copy-mediaserver"/>
         <zip destfile="${target}/pelisalacarta-mediaserver-${version}${build}.zip" basedir="${target}/tmp"/>
         <copy file="${target}/pelisalacarta-mediaserver-${version}${build}.zip" tofile="${target}/pelisalacarta-mediaserver.zip"/>
         <delete dir="${target}/tmp/pelisalacarta"/>
-        <antcall target="copy-applications"/>
-        <zip destfile="${target}/applications.zip" basedir="${target}/tmp"/>
+
         <delete dir="${target}/tmp"/>
+        
         <copy file="pelisalacarta/version.xml" tofile="${target}/version.xml"/>
     </target>
 
     <target name="trunk" depends="clean" description="Builds a package for each platform">
         <property-exp name="build" value="${build} + 1" />
         <mkdir dir="${target}/tmp"/>
+        
+        <antcall target="copy-applications"/>
+        <zip destfile="${target}/applications.zip" basedir="${target}/tmp"/>
+        
         <antcall target="copy-mediaserver"/>
         <zip destfile="${target}/pelisalacarta-mediaserver-${version}${build}.zip" basedir="${target}/tmp"/>
         <copy file="${target}/pelisalacarta-mediaserver-${version}${build}.zip" tofile="${target}/pelisalacarta-mediaserver.zip"/>
         <delete dir="${target}/tmp/pelisalacarta"/>
-        <antcall target="copy-applications"/>
-        <zip destfile="${target}/applications.zip" basedir="${target}/tmp"/>
+      
         <delete dir="${target}/tmp"/>
+        
         <copy file="pelisalacarta/version.xml" tofile="${target}/version.xml"/>
         <replaceregexp file="${target}/version.xml" match="&lt;tag&gt;(.*?)&lt;/tag&gt;" replace="&lt;tag&gt;${version}${build}&lt;/tag&gt;"/>
         <replaceregexp file="${target}/version.xml" match="&lt;date&gt;(.*?)&lt;/date&gt;" replace="&lt;date&gt;${versiondate}&lt;/date&gt;"/>
         <replaceregexp file="${target}/version.xml" match="&lt;changes&gt;(.*?)&lt;/changes&gt;" replace="&lt;changes&gt;${versionchanges}&lt;/changes&gt;"/>
+
     </target>   
     
 	<!-- copy-mediaserver ============================================================ -->
@@ -64,6 +73,7 @@
         </copy>
         <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/mediaserver/settings.xml" match='&lt;setting default="(.*?)" id="server.port" label="Puerto HTTP" type="text"/&gt;' replace='&lt;setting default="8888" id="server.port" label="Puerto HTTP" type="text"/&gt;'/>
         <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/mediaserver/settings.xml" match='&lt;setting default="(.*?)" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;' replace='&lt;setting default="8889" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;'/>
+        <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/mediaserver/config.py" match='\.pelisalacarta' replace='pelisalacarta'/>
         <replaceregexp file="${target}/tmp/pelisalacarta/pelisalacarta.py" match="if 1" replace="if 0" flags="g" byline="true"/>
 
     </target>
