@@ -4,7 +4,7 @@
     <property name="target" value="update"/>
     
     <property name="version" value="3.9.99"/>
-    <property name="build" value="06"/>
+    <property name="build" value="07"/>
     <property name="versiondate" value="03/06/2015"/>
     <property name="versionchanges" value=""/>
     
