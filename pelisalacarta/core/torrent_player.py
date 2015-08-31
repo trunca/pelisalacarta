@@ -88,21 +88,57 @@ def download(item, VideoItem=Item(url=["",""]), Reproducir =  False):
     #Obtenemos la info del Torrent
     if torrent.has_metadata():
       info = torrent.get_torrent_info()
-
-      #Buscamos el archivo del vídeo, en principio es el de mayor tamaño.
+      VideoFiles=[]
+      SrtFiles=[]
+      Files = []
       for f in info.files():
-        if f.size > video_file_size:
-          video_file_size = f.size
-          video_file_path = f.path.decode("utf8")
-          video_file = os.path.basename(video_file_path)
+        Size = 0
+        for file in Files:
+          Size += file["Size"]
+
+        Start = int(Size / info.piece_length())
+        End = int((Size + f.size) / info.piece_length()) 
+        Files.append({"Start":Start, "End" : End, "Size": f.size, "Path" : f.path})
+        
+        
+      VideoExtensions =  ["avi", "mp4", "mkv", "flv", "mpeg", "ts"]  
+      
+      for file in Files:
+        if file["Path"].split(".")[len( file["Path"].split("."))-1].lower() in VideoExtensions:
+          VideoFiles.append(file)
+
+        elif file["Path"].split(".")[len(file["Path"].split("."))-1].lower() =="srt":
+         SrtFiles.append(file)
+
           
-      VideoItem.url[1] = os.path.join(save_path_videos,video_file_path.encode("utf8"))
+      VideoItem.url[1] = os.path.join(save_path_videos, VideoFiles[0]["Path"].encode("utf8"))
+      
       
       #Loop para controlar la descarga
       ReproduccionIniciada = False
       IniciarAutomatico = Reproducir
+      
       while (not torrent.is_seed()):
           time.sleep(1)
+          VideoFile = VideoFiles[0]
+          
+          for x , piece in enumerate(torrent.status().pieces):
+            if torrent.status().pieces[x]: logger.error("Pieza descargada: " + str(x))
+            
+          for x in range(VideoFile["Start"],VideoFile["End"]- VideoFile["Start"] +1):
+            if (not torrent.status().pieces[x]):          
+              torrent.piece_priority(x,5)
+              torrent.piece_priority(x+1,4)
+              torrent.piece_priority(x+2,3)
+              torrent.piece_priority(x+3,2)
+            else:
+              torrent.piece_priority(x,7)
+
+          #Los Srt Primero      
+          if len(SrtFiles):
+            SrtFile = SrtFiles[0]
+            for x in range(SrtFile["Start"],SrtFile["End"]- SrtFile["Start"] +1):
+              torrent.piece_priority(x,7)
           Progreso(session,torrent,pDialog,Time)
           
           #Si se cierra el reproductor, vuelve a mostrar el progreso

@@ -83,7 +83,7 @@ def buscador(item):
     for scrapedtitulo, scrapedurl, scrapedthumbnail, scrapedplot in matches:
         scrapedurl = "http://zentorrents.com" + scrapedurl
         scrapedplot = HTMLParser.HTMLParser().unescape(scrapedplot)
-        itemlist.append( Item(channel=__channel__, title=scrapedtitulo, url=scrapedurl, action="findvideos", thumbnail=scrapedthumbnail, fulltitle=scrapedtitulo, plot=scrapedplot, fanart="http://s6.postimg.org/4j8vdzy6p/zenwallbasic.jpg", folder=True) )
+        itemlist.append( Item(channel=__channel__, title=scrapedtitulo, url=scrapedurl, action="play", thumbnail=scrapedthumbnail, fulltitle=scrapedtitulo, plot=scrapedplot, fanart="http://s6.postimg.org/4j8vdzy6p/zenwallbasic.jpg", folder=True) )
     return itemlist
 
 
@@ -107,7 +107,7 @@ def peliculas(item):
     
     for scrapedtitulo, scrapedurl, scrapedthumbnail, scrapedcreatedate in matches:
         scrapedurl = "http://zentorrents.com" + scrapedurl
-        itemlist.append( Item(channel=__channel__, title=scrapedtitulo + " ("+scrapedcreatedate+")", url=scrapedurl, action="findvideos", thumbnail=scrapedthumbnail, fanart="http://s6.postimg.org/4j8vdzy6p/zenwallbasic.jpg", folder=True) )
+        itemlist.append( Item(channel=__channel__, title=scrapedtitulo + " ("+scrapedcreatedate+")", url=scrapedurl, action="play", thumbnail=scrapedthumbnail, fanart="http://s6.postimg.org/4j8vdzy6p/zenwallbasic.jpg", folder=True) )
         
         
     # 1080,720 y seies
@@ -122,7 +122,7 @@ def peliculas(item):
     
     for scrapedurl, scrapedtitulo, scrapedthumbnail, scrapedcreatedate in matches:
         scrapedurl = "http://zentorrents.com" + scrapedurl
-        itemlist.append( Item(channel=__channel__, title=scrapedtitulo + " ("+scrapedcreatedate+")", url=scrapedurl, action="findvideos", thumbnail=scrapedthumbnail, fanart="http://s6.postimg.org/4j8vdzy6p/zenwallbasic.jpg", folder=True) )
+        itemlist.append( Item(channel=__channel__, title=scrapedtitulo + " ("+scrapedcreatedate+")", url=scrapedurl, action="play", thumbnail=scrapedthumbnail, fanart="http://s6.postimg.org/4j8vdzy6p/zenwallbasic.jpg", folder=True) )
 
     # Extrae el paginador
     patronvideos  = '<a href="([^"]+)" title="Siguiente">Siguiente</a>'
@@ -135,30 +135,30 @@ def peliculas(item):
     return itemlist
 
 
-def findvideos(item):
+def play(item):
     logger.info("pelisalacarta.zentorrents findvideos")
     
     itemlist = []
     
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = scrapertools.downloadpage(item.url)
     data = re.sub(r"\n|\r|\t|\s{2}|&nbsp;|</p>|<p>|&amp;|amp;","",data)
     
     patron = '<div class="descargatext">.*?'
     patron += '<img alt="([^<]+)" '
     patron += 'src="([^"]+)".*?'
-    patron += 'type.*?href="([^"]+)"'
+    patron += '<a href="/download([^"]+)"'
     
     
     matches = re.compile(patron,re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
     
     for scrapedtitulo, scrapedthumbnail, scrapedurl in matches:
-      data = scrapertools.cache_page(scrapedurl)
-      link = scrapertools.get_match(data,"{ window.open\('([^']+)'")
+      scrapedurl = "http://www.zentorrents.com/download" + scrapedurl
+      data = scrapertools.downloadpage(scrapedurl)
+      link = scrapertools.get_match(data,'Si la descarga no comienza autom&aacute;ticamente, prueba haciendo click <a href="([^"]+)">')
       itemlist.append( Item(channel=__channel__, title =scrapedtitulo + " (Torrent)" , thumbnail=scrapedthumbnail, url=link, server="torrent", action="play", folder=False) )
-    
-    
+
     return itemlist
 
 def test():

@@ -899,7 +899,38 @@ function GetResponses(data) {
                 JsonResponse["Title"] = JsonResponse["Title"].replace(resultado[1],"<i>")
                 JsonResponse["Title"] = JsonResponse["Title"].replace(resultado[2],"</i>")
             }
-                    
+            //[COLOR xxx][/COLOR]
+            var re = /(\[COLOR ([^\]]+)\])(?:.*?)(\[\/COLOR\])/g; 
+            var str = JsonResponse["Plot"];
+            while ((resultado= re.exec(str)) !== null) {
+                if (resultado.index === re.lastIndex) {
+                    re.lastIndex++;
+                }
+                JsonResponse["Plot"] = JsonResponse["Plot"].replace(resultado[1],"<span style='color:"+resultado[2]+"'>")
+                JsonResponse["Plot"] = JsonResponse["Plot"].replace(resultado[3],"</span>")
+            }
+            
+            //[B][/B]
+            var re = /(\[B\])(?:.*?)(\[\/B\])/g; 
+            var str = JsonResponse["Plot"];
+            while ((resultado= re.exec(str)) !== null) {
+                if (resultado.index === re.lastIndex) {
+                    re.lastIndex++;
+                }
+                JsonResponse["Plot"] = JsonResponse["Plot"].replace(resultado[1],"<b>")
+                JsonResponse["Plot"] = JsonResponse["Plot"].replace(resultado[2],"</b>")
+            }
+            
+            //[i][/i]
+            var re = /(\[I\])(?:.*?)(\[\/I\])/g; 
+            var str = JsonResponse["Plot"];
+            while ((resultado= re.exec(str)) !== null) {
+                if (resultado.index === re.lastIndex) {
+                    re.lastIndex++;
+                }
+                JsonResponse["Plot"] = JsonResponse["Plot"].replace(resultado[1],"<i>")
+                JsonResponse["Plot"] = JsonResponse["Plot"].replace(resultado[2],"</i>")
+            }
             HtmlItem ='<li class="ListItem"><a onblur="DesCargarInfo(this)" onfocus="CargarInfo(this);ItemFocus=this" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;DescargarContenido(\''+ JsonResponse["Url"] +'\')"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonResponse["Host"]+'" src="'+JsonResponse["Thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonResponse["Title"] + '</h3><p class="ListItem">' + JsonResponse["Plot"] + '</p></a>{$BotonMenu}</li>'
             Lista = "";
             for (x = 0; x < JsonResponse["ContextMenu"]["Count"]; x++) {
@@ -1034,7 +1065,7 @@ function GetResponses(data) {
              //archivos locales
              if(!new RegExp("^(.+://)").test(JsonResponse["Url"])){
               buffer = false;
-              if (PythonPath !=""){
+              if (PythonPath !="" && JsonResponse["Url"].indexOf(".mkv")==-1){
                 JsonResponse["Url"] =  PythonPath + JsonResponse["Url"]
               }else{
                 JsonResponse["Url"] = JsonResponse["Host"]+"/local-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"

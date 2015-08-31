@@ -142,14 +142,20 @@ def gay(item):
 # OBTIENE LOS ENLACES SEGUN LOS PATRONES DEL VIDEO Y LOS UNE CON EL SERVIDOR
 def play(item):
     logger.info("[xhamster.py] play")
-    itemlist = []
-
+    itemlist=[]
+    # Descarga la página
     data = scrapertools.cachePage(item.url)
-    #logger.debug(data)
+    data = scrapertools.unescape(data)
+    logger.info(data)
+    from servers import servertools
+    itemlist.extend(servertools.find_video_items(data=data))
+    for videoitem in itemlist:
+        videoitem.thumbnail = item.thumbnail
+        videoitem.channel=__channel__
+        videoitem.action="play"
+        videoitem.folder=False
+        videoitem.title = item.title
 
-    url = scrapertools.get_match(data,'<video poster="[^"]+" type=\'video/mp4\' file="([^"]+)"')
-    logger.debug("url="+url)
-    itemlist.append( Item(channel=__channel__, action="play" , title=item.title, fulltitle=item.fulltitle , url=url, thumbnail=item.thumbnail, plot=item.plot, show=item.title, server="directo", folder=False))
     return itemlist
 
 

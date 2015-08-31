@@ -129,6 +129,8 @@ class Handler(BaseHTTPRequestHandler):
           else:
             Inicio=0
             Fin = Size-1
+          
+          if not Fin > Inicio: Fin = Size-1
             
           if self.headers.get("range") ==None:
             logger.info("-------------------------------------------------------")

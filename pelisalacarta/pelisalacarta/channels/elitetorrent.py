@@ -155,7 +155,7 @@ def findvideos(item):
     data = scrapertools.cache_page(item.url)
 
     #patron para .torrent
-    link = scrapertools.get_match(data,'<a href="([^"]+)" class="enlace_torrent degradado[^>]+>Descargar el .torrent</a>')
+    link = scrapertools.get_match(data,'<a href="([^"]+)" class="[^"]+">Descargar el .torrent</a>')
     link = urlparse.urljoin(item.url,link)
     itemlist.append( Item(channel=__channel__, action="play", server="torrent", title="Ver en torrent (.torrent)", fulltitle=item.title , url=link , thumbnail=item.thumbnail , plot=item.plot , folder=False) )
 
