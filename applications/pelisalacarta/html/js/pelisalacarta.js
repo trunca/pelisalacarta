@@ -1068,7 +1068,8 @@ function GetResponses(data) {
               if (PythonPath !="" && JsonResponse["Url"].indexOf(".mkv")==-1){
                 JsonResponse["Url"] =  PythonPath + JsonResponse["Url"]
               }else{
-                JsonResponse["Url"] = JsonResponse["Host"]+"/local-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"
+                JsonResponse["Url"] =  PythonPath + JsonResponse["Url"]
+                //JsonResponse["Url"] = JsonResponse["Host"]+"/local-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"
               }
              }
              /*
