@@ -51,7 +51,7 @@ def mainlist(item):
     itemlist.append( Item(channel=__channel__, title="Series" , action="getlist"           , url="http://www.mejortorrent.com/torrents-de-series.html" ))
     itemlist.append( Item(channel=__channel__, title="Series HD" , action="getlist"           , url="http://www.mejortorrent.com/torrents-de-series-hd-alta-definicion.html" ))
     itemlist.append( Item(channel=__channel__, title="Series Listado Alfabetico" , action="listalfabetico"           , url="http://www.mejortorrent.com/torrents-de-series.html" ))
-    itemlist.append( Item(channel=__channel__, title="Documentales" , action="getlist"           , url="http://www.mejortorrent.com/torrents-de-series.html" ))
+    itemlist.append( Item(channel=__channel__, title="Documentales" , action="getlist"           , url="http://www.mejortorrent.com/torrents-de-documentales.html" ))
     itemlist.append( Item(channel=__channel__, title="Buscar..." , action="search"           , url="http://www.mejortorrent.com/torrents-de-documentales.html" ))
     
     

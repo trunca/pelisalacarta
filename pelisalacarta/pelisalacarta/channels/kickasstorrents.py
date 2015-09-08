@@ -86,9 +86,16 @@ def pelicula(item):
   itemlist = [] 
   data = scrapertools.cachePage(item.url)
 
-  
-  title = scrapertools.get_match(data,'<li><strong>Movie:</strong> <a href="[^"]+"><span>([^<]+)</span></a></li>')
-  quality = scrapertools.get_match(data,'<li><strong>Detected quality:</strong> <span id="[^"]+">([^<]+)</span></li>')
+  if "<li><strong>Episode title:</strong>" in data:
+    show = scrapertools.get_match(data,'<li><a href="[^"]+">View all <strong>([^<]+)</strong> episodes</a></li>')
+    episode_title = scrapertools.get_match(data,'<li><strong>Episode title:</strong>([^<]+)</li>').strip()
+    episodio = scrapertools.get_match(data,'<li><strong>Episode:</strong>([^<]+)</li>').strip()
+    c,e = episodio = scrapertools.get_match(episodio,'S([0-9]+)E([0-9]+)')
+    title = show + " " + c + "x" + e + " " + episode_title
+    quality = ""
+  else:
+    title = scrapertools.get_match(data,'<li><strong>Movie:</strong> <a href="[^"]+"><span>([^<]+)</span></a></li>')
+    quality = scrapertools.get_match(data,'<li><strong>Detected quality:</strong> <span id="[^"]+">([^<]+)</span></li>')
   thumbnail = scrapertools.get_match(data,'<a class="movieCover" href="[^"]+"><img src="([^"]+)" /></a>')
   url = scrapertools.get_match(data,'<a class="movieCover" href="([^"]+)"><img src="[^"]+" /></a>')
   url = urlparse.urljoin(item.url,url)
@@ -98,9 +105,11 @@ def pelicula(item):
   size = scrapertools.get_match(data,'<div class="widgetSize"><span class="torType filmType"></span> <strong>([^<]+)<span>([^<]+)</span></strong></div>')
   torrent = scrapertools.get_match(data,'<a class="siteButton giantButton" href="([^"]+)">')
   torrent =  urlparse.urljoin(item.url,torrent)
-                                        
   
-  fulltitle = title + " [COLOR green](" + quality + ")[/COLOR] [COLOR skyblue](" + size[0] + size[1] + ")[/COLOR] "
+  fulltitle = title                                    
+  if quality:
+    fulltitle += " [COLOR green](" + quality + ")[/COLOR]"
+  fulltitle += " [COLOR skyblue](" + size[0] + size[1] + ")[/COLOR]"
   fulltitle += " [COLOR orange](L: " + leechers + " S: " + seeders + ")[/COLOR]"
 			
   itemlist.append( Item(channel=__channel__, action="play", fulltitle=fulltitle, server="torrent", title=title, url=torrent, thumbnail=thumbnail, plot=plot, folder=False) )  
