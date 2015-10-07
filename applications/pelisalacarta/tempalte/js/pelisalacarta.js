@@ -7,81 +7,22 @@ var Opciones = {};
 var ItemFocus ="";
 var TiempoCache =2000;
 var Tecla ={"keyCode":0,"Time":0, "Char":""};
-var IP ="";
-var Port ="";
 var websocket="";
 var PlotInterval = "";
-var debug= false;
-var PythonPath ="";
+
 
 //Eventos
 window.onload = function() {
-    //IP ="192.168.2.102";
-    //Port ="8081";
-    //HED.window.enable_debug()
-    //HED.window.show_debug_window()
-    HED.configuration.get_key("ip",function(key){IP=key[0]["value"]},function(key){IP="localhost"})
-    HED.configuration.get_key("port",function(key){Port=key[0]["value"];},function(key){Port="8889"})
-    GetDevices();
     Dispose();
     WebSocketConnect();
     DescargarContenido("");
 };
-
-
-function GetDevices() {
-   HED.fs.get_devices(undefined, undefined,
-      ['name','root','type','subtype','volume'],
-      'type',
-      'asc',
-      [{'by': 'type', 'value':'local'}],
-      
-      function(oDevices) {         
-         next_device(0);
-         function next_device(i) {
-            if (i >= oDevices.length) {
-            }
-            var device_id = (oDevices[i].root.split('/by-id/')[1]).split('/')[0];
-            HED.fs.get_files(
-               {
-                  'device': oDevices[i].name,               
-                  'path': "/bg_apps/pelisalacarta/",
-                  'order': 'name',
-                  'dir': 'asc',
-                  'mediaTypes': ['dir']                  
-               },
-               function(oFiles){
-                  for (var j in oFiles.list) {
-                     PythonPath = oDevices[i].root + "/bg_apps"
-                     return
-                  }                  
-                  next_device(i+1);
-               },
-               function(oError) {
-                  next_device(i+1);
-               }
-            );
-            
-         }
-      },
-      function(oError) {}
-   );   
-}
 window.onresize = function() {
     Dispose();
 };
 
 window.onkeydown =  function(e){
-  if (e.keyCode==HED.KC_STOP){
-    HED.helpers.quit()
-  }
-  if (e.keyCode==HED.KC_YELLOW){
-    AbrirServidor()
-  }
-
-  if (e.keyCode==HED.KC_RED){
-    WebSocketConnect();
-  }
+  if (e.keyCode==27){CerrarDialogos();}
   try{
     if(e.target.tagName=="BODY"){BodyKeyDown(e)}
     if(e.target.id=="Loading"){LoadingKeyDown(e)}
@@ -119,51 +60,51 @@ window.onkeydown =  function(e){
 
 function ListItemKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_0:
-    case HED.KC_1:
-    case HED.KC_2:
-    case HED.KC_3:
-    case HED.KC_4:
-    case HED.KC_5:
-    case HED.KC_6:
-    case HED.KC_7:
-    case HED.KC_8:
-    case HED.KC_9:
+    case 96:
+    case 97:
+    case 98:
+    case 99:
+    case 100:
+    case 101:
+    case 102:
+    case 103:
+    case 104:
+    case 105:
       Buscar(e.keyCode)
       break;
-    case HED.KC_CONTEXTMENU: //Menu
+    case 93: //Menu
       e.preventDefault();
       if (e.target.parentNode.children.length ==2){
         e.target.parentNode.children[1].onclick.apply(e.target.parentNode.children[1]);
         ItemFocus = e.target;
       }
       break;
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       e.preventDefault();
       if (Navegacion.length >1){Back();}
       else{HED.helpers.quit();}
       break;
     
-    case HED.KC_LEFT: //Left
+    case 37: //Left
       e.preventDefault();
       index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
       document.activeElement.parentNode.children[index-1].focus();
       break;
     
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault();
       index = Array.prototype.indexOf.call(document.getElementById("itemlist").children, document.activeElement.parentNode);
       if (index ==0){index = document.getElementById("itemlist").children.length}
       document.activeElement.parentNode.parentNode.children[index-1].children[0].focus();
       break;
     
-    case HED.KC_RIGHT: //RIGHT
+    case 39: //RIGHT
       e.preventDefault();
       index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
       document.activeElement.parentNode.children[index+1].focus();
       break;
       
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault();
       index = Array.prototype.indexOf.call(document.getElementById("itemlist").children, document.activeElement.parentNode);
       if (index+1 ==document.getElementById("itemlist").children.length){index = -1}
@@ -174,7 +115,7 @@ function ListItemKeyDown(e){
 
 function LoadingKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       CerrarLoading()
       e.preventDefault();
       break;
@@ -183,27 +124,27 @@ function LoadingKeyDown(e){
 
 function BodyKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       e.preventDefault();
       HED.window.get().destroy()
       break;
       
-    case HED.KC_LEFT: //Left
+    case 37: //Left
       e.preventDefault();
       document.getElementById("itemlist").children[0].children[0].focus();
       break;
       
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       document.getElementById("itemlist").children[0].children[0].focus();
       break;
       
-    case HED.KC_RIGHT: //RIGHT
+    case 39: //RIGHT
       e.preventDefault();
       document.getElementById("itemlist").children[0].children[0].focus();
       break;
       
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault();
       document.getElementById("itemlist").children[0].children[0].focus();
       break;
@@ -212,19 +153,19 @@ function BodyKeyDown(e){
 
 function ListaKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       e.preventDefault(); 
       CerrarDialogos()
       break;
 
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       index = Array.prototype.indexOf.call(document.activeElement.parentNode.parentNode.children, document.activeElement.parentNode);
       if (index !=0){document.activeElement.parentNode.parentNode.children[index-1].children[0].focus()}
       else{ document.activeElement.parentNode.parentNode.parentNode.parentNode.children[0].focus()}
       break;
 
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault();
       if (e.target.parentNode.id=="Lista-popup"){document.activeElement.parentNode.children[2].children[0].children[0].children[0].focus()}
       else{
@@ -237,14 +178,14 @@ function ListaKeyDown(e){
 
 function ConfigKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       if ((e.target.tagName != "INPUT" || (e.target.type != "text" && e.target.type != "password")) && e.target.tagName != "SELECT"){
         e.preventDefault(); 
         CerrarDialogos()
       }
       break;
       
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       if (e.target.parentNode.id=="Config-secciones"){document.activeElement.parentNode.parentNode.children[0].focus()};
       if (e.target.parentNode.id=="Config-botones"){
@@ -267,27 +208,27 @@ function ConfigKeyDown(e){
       }    
       break;
       
-    case HED.KC_LEFT: //Left
+    case 37: //Left
       if ((e.target.tagName != "INPUT" || (e.target.type != "text" && e.target.type != "password")) && e.target.tagName != "SELECT"){
         e.preventDefault(); 
         if (e.target.parentNode.parentNode.id=="Config-popup"){
           index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
           document.activeElement.parentNode.children[index-1].focus();
         }
-      }  
+      }      
       break;
       
-    case HED.KC_RIGHT: //RIGHT
+    case 39: //RIGHT
       if ((e.target.tagName != "INPUT" || (e.target.type != "text" && e.target.type != "password")) && e.target.tagName != "SELECT"){
         e.preventDefault(); 
         if (e.target.parentNode.parentNode.id=="Config-popup"){
         index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
         document.activeElement.parentNode.children[index+1].focus();
         }
-      }
+      }   
       break;
     
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault(); 
       if (e.target.parentNode.id=="Config-popup"){document.activeElement.parentNode.children[2].children[0].focus()}
       if (e.target.parentNode.id=="Config-secciones"){
@@ -313,17 +254,17 @@ function ConfigKeyDown(e){
 
 function AlertKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       e.preventDefault(); 
       CerrarDialogos()
       break;
       
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="Alert-popup"){document.activeElement.parentNode.parentNode.children[0].focus()}
       break;
       
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault();
       if (e.target.parentNode.id=="Alert-popup"){document.activeElement.parentNode.children[3].children[0].focus()}
       break;
@@ -332,17 +273,17 @@ function AlertKeyDown(e){
 
 function ProgressKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       e.preventDefault(); 
       CerrarDialogos()
       break;
       
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="ProgressBar-popup"){document.activeElement.parentNode.parentNode.children[0].focus()}
       break;
       
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault(); 
       if (e.target.parentNode.id=="ProgressBar-popup"){document.activeElement.parentNode.children[4].children[0].focus()}
       break;
@@ -351,16 +292,16 @@ function ProgressKeyDown(e){
 
 function AlertYesNoKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       e.preventDefault(); 
       CerrarDialogos()
       break;
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="AlertYesNo-popup"){document.activeElement.parentNode.parentNode.children[0].focus()}
       break;
       
-    case HED.KC_LEFT: //Left
+    case 37: //Left
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="AlertYesNo-popup"){
         index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
@@ -368,7 +309,7 @@ function AlertYesNoKeyDown(e){
       }
       break;
       
-    case HED.KC_RIGHT: //RIGHT
+    case 39: //RIGHT
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="AlertYesNo-popup"){
         index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
@@ -376,7 +317,7 @@ function AlertYesNoKeyDown(e){
       }
       break;
       
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault(); 
       if (e.target.parentNode.id=="AlertYesNo-popup"){document.activeElement.parentNode.children[3].children[0].focus()}
       break;
@@ -385,14 +326,14 @@ function AlertYesNoKeyDown(e){
 
 function ServidorKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       if (e.target.tagName != "INPUT"){
         e.preventDefault(); 
         CerrarDialogos()
       }
       break;
       
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="Servidor-popup"){
         document.getElementById('Servidor-popup').children[2].children[0].children[1].children[0].children[1].children[0].children[0].focus()
@@ -407,7 +348,7 @@ function ServidorKeyDown(e){
       }
       break;
       
-    case HED.KC_LEFT: //Left
+    case 37: //Left
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="Servidor-popup"){
         index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
@@ -415,7 +356,7 @@ function ServidorKeyDown(e){
       }
       break;
       
-    case HED.KC_RIGHT: //RIGHT
+    case 39: //RIGHT
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="Servidor-popup"){
         index = Array.prototype.indexOf.call(document.activeElement.parentNode.children, document.activeElement);
@@ -424,7 +365,7 @@ function ServidorKeyDown(e){
 
       break;
     
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault(); 
       if (e.target.parentNode.id=="Servidor-popup"){document.activeElement.parentNode.children[2].children[0].children[0].children[0].children[1].children[0].children[0].focus()}
       if (e.target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.id=="Servidor-popup"){
@@ -441,20 +382,20 @@ function ServidorKeyDown(e){
 
 function KeyboardKeyDown(e){
   switch (e.keyCode) {
-    case HED.KC_RETURN: //Atras
+    case 8: //Atras
       if (e.target.id != "Keyboard-Text"){
         e.preventDefault(); 
         CerrarDialogos()
       }
       break;
-    case HED.KC_UP: //UP
+    case 38: //UP
       e.preventDefault(); 
       if (e.target.parentNode.parentNode.id=="Keyboard-popup"){document.activeElement.parentNode.parentNode.children[2].children[0].children[0].focus()}
       if (e.target.parentNode.parentNode.parentNode.id=="Keyboard-popup"){document.activeElement.parentNode.parentNode.parentNode.children[0].focus()}
 
       break;
       
-    case HED.KC_LEFT: //Left
+    case 37: //Left
        
       if (e.target.parentNode.parentNode.id=="Keyboard-popup"){
         e.preventDefault();
@@ -463,7 +404,7 @@ function KeyboardKeyDown(e){
       }
       break;
       
-    case HED.KC_RIGHT: //RIGHT
+    case 39: //RIGHT
        
       if (e.target.parentNode.parentNode.id=="Keyboard-popup"){
         e.preventDefault();
@@ -472,7 +413,7 @@ function KeyboardKeyDown(e){
       }
       break;
       
-    case HED.KC_DOWN: //DOWN
+    case 40: //DOWN
       e.preventDefault(); 
       if (e.target.parentNode.id=="Keyboard-popup"){document.activeElement.parentNode.children[2].children[0].children[0].focus()}
       if (e.target.parentNode.parentNode.parentNode.id=="Keyboard-popup"){document.activeElement.parentNode.parentNode.parentNode.children[3].children[0].focus()}
@@ -482,17 +423,17 @@ function KeyboardKeyDown(e){
 
 function Buscar(keyCode) {
   switch (keyCode) {
-    case HED.KC_0:
+    case 96:
       Tecla["keyCode"]=keyCode
       Tecla["Char"] = "0"
       break;
       
-    case HED.KC_1:
+    case 97:
       Tecla["keyCode"]=keyCode
       Tecla["Char"] = "1"
       break;
       
-    case HED.KC_2:
+    case 98:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "a":
@@ -514,7 +455,7 @@ function Buscar(keyCode) {
       }       
       break;
       
-    case HED.KC_3:
+    case 99:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "d":
@@ -536,7 +477,7 @@ function Buscar(keyCode) {
       }   
       break;
       
-    case HED.KC_4:
+    case 100:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "g":
@@ -558,7 +499,7 @@ function Buscar(keyCode) {
       }
       break;
       
-    case HED.KC_5:
+    case 101:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "j":
@@ -580,7 +521,7 @@ function Buscar(keyCode) {
       }
       break;
       
-    case HED.KC_6:
+    case 102:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "m":
@@ -602,7 +543,7 @@ function Buscar(keyCode) {
       }
       break;
       
-    case HED.KC_7:
+    case 103:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "p":
@@ -627,7 +568,7 @@ function Buscar(keyCode) {
       }
       break;
       
-    case HED.KC_8:
+    case 104:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "t":
@@ -649,7 +590,7 @@ function Buscar(keyCode) {
       }
       break;
       
-    case HED.KC_9:
+    case 105:
       if (Tecla["keyCode"]==keyCode){
         switch (Tecla["Char"]){
           case "x":
@@ -709,12 +650,11 @@ function CerrarDialogos() {
   document.getElementById("Loading").style.display="none";
   document.getElementById("Lista-popup").style.display="none";
   document.getElementById("Config-popup").style.display="none";
+  document.getElementById("Player-popup").style.display="none";
   document.getElementById("Alert-popup").style.display="none";
   document.getElementById("AlertYesNo-popup").style.display="none";
-  document.getElementById("Servidor-popup").style.display="none";
   document.getElementById("Keyboard-popup").style.display="none";
   document.getElementById("ProgressBar-popup").style.display="none";
-
     try{ 
   ItemFocus.focus()
   }catch(e){
@@ -739,6 +679,19 @@ function AbrirLista(Title,Lista) {
   document.getElementById("Lista-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("Lista-popup").offsetHeight / 2 + "px"  
 }
 
+function AbrirPlayer(Title,Player) {
+  document.getElementById("Overlay").style.display="block"
+  document.getElementById("Player-titulo").innerHTML = atob(Title);
+  document.getElementById("Player").innerHTML = Player;
+  document.getElementById("Player-popup").style.display="block";
+  document.getElementById("Player-popup").children[0].focus()
+  document.getElementById("Player-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("Player-popup").offsetHeight / 2 + "px"  
+  
+  setTimeout(function() {
+        document.getElementById("Player-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("Player-popup").offsetHeight / 2 + "px"  
+  }, 500);
+}
+
 function AbrirAlert(Title,Text) {
   document.getElementById("Overlay").style.display="block";
   document.getElementById("Alert-popup").style.display="block";
@@ -757,16 +710,6 @@ function AbrirAlertYesNo(Title,Text) {
   document.getElementById("AlertYesNo-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("AlertYesNo-popup").offsetHeight / 2 + "px"
 }
 
-function AbrirServidor() {
-  CerrarDialogos();
-  document.getElementById("Overlay").style.display="block";
-  document.getElementById("Servidor-popup").style.display="block";
-  document.getElementById("Servidor-Titulo").innerHTML = "Servidor"
-  document.getElementById("Servidor-IP").value = IP;
-  document.getElementById("Servidor-Port").value = Port;
-  document.getElementById("Servidor-popup").children[3].children[0].focus();
-  document.getElementById("Servidor-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("Servidor-popup").offsetHeight / 2 + "px"
-}
 
 function AbrirKeyboard(Title,Text,Password) {
   if (Title === "") {Title = "Teclado";}
@@ -832,8 +775,7 @@ function WebSocketConnect() {
     if (websocket!=""){websocket.close()}
     document.getElementById("Conexion").innerHTML = "Conectando...";
     document.getElementById("Loading-Text").innerHTML = "Estableciendo conexión...";
-    if ((IP=="") || (Port=="")){setTimeout('WebSocketConnect()', 500);return}
-    websocket = new WebSocket("ws://"+IP+":"+Port+"/");
+    websocket = new WebSocket(WebSocketHost);
     websocket.onopen = function(evt) {
         document.getElementById("Loading-Text").innerHTML = "Cargando...";
         document.getElementById("Conexion").innerHTML = "Conectado";
@@ -848,14 +790,13 @@ function WebSocketConnect() {
     };
 
     websocket.onerror = function(evt) {
-        alert("No se ha podido conectar con: " + "ws://"+IP+":"+Port+"/ \nRevisa la configuración")
-        CerrarLoading()
         websocket.close();
     };
 }
 
 function WebSocketSend(data) {
     if (websocket.readyState != 1) {
+        WebSocketConnect()
         setTimeout('WebSocketSend("' + data + '")', 500);
         return;
     } else {
@@ -1046,7 +987,7 @@ function GetResponses(data) {
             EnviarDatos(document.getElementById("ProgressBar-Cancelled").checked !="");
             break;
         case "isPlaying":
-            EnviarDatos(HED.avmedia.isActive());
+            EnviarDatos(document.getElementById("Player-popup").style.display=="block" || document.getElementById("Lista-popup").style.display=="block");
             break;
         case "ProgressUpdate":
             UpdateProgress(JsonResponse["Title"],JsonResponse["Text"].replace(new RegExp("\n", 'g'), "<br/>"),JsonResponse["Progress"])
@@ -1065,151 +1006,27 @@ function GetResponses(data) {
             Lista = "";
             for (x = 0; x < JsonResponse["List"]["Count"]; x++) {
                 Lista +=
-                    '<li class="Lista"><a href="javascript:void(0)" onclick="CerrarDialogos();EnviarDatos(\'' + x +
+                    '<li class="Lista"><a href="javascript:void(0)" onmouseover="this.focus()" onclick="CerrarDialogos();EnviarDatos(\'' + x +
                     '\')" class="Lista"><h3>' + JsonResponse["List"]["Title" + x] + '</h3></a></li>';
             }
             AbrirLista(JsonResponse["Title"],Lista)
             break;
         case "Play":
-             Load = false;
-             buffer = true;
-             JsonResponse["Url"] = JsonResponse["Url"].replace(/&amp;/g, '&');
-             //JsonResponse["Url"] = JsonResponse["Url"].split("?")[0]
-             
-             //archivos locales
-             if(!new RegExp("^(.+://)").test(JsonResponse["Url"])){
-              buffer = false;
-              if (PythonPath !="" && JsonResponse["Url"].indexOf(".mkv")==-1){
-                JsonResponse["Url"] =  PythonPath + JsonResponse["Url"]
-              }else{
-                JsonResponse["Url"] =  PythonPath + JsonResponse["Url"]
-                //JsonResponse["Url"] = JsonResponse["Host"]+"/local-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"
-              }
-             }
-             /*
-             if (JsonResponse["ServerUrl"].indexOf("mega.co.nz") != -1) {
-              JsonResponse["Url"] = JsonResponse["ServerUrl"]
-              Load = true;
-             }
-             */
-             /*
-             var oOptions = {
-              x: 1280/2, y: 720/2, width: 0, height: 0, 
-              type: 'browser',
-              windowOptions: [
-                'destroyOnMenuKey', // Important!
-                'noTabs',
-                'noTabBar',
-                'noToolBar',
-                'noBookmarksMenu',
-                'noSettingsMenu',
-                'readonlyUrl',
-                'noExitConfirm',
-              ],
-              downloadOptions: ['downloadAndPlay'],
-              userAgent: "Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10",
-              url: JsonResponse["Url"],
-              fCallbacks: {
-                fOnPlay: function(internalId, sUrl) {
-                  var browser = HED.window.getByInternalId(internalId, true);
-                  var parent = browser.oArgs.parent;
-                  browser.destroy();
-                  parent.hide();
-                  browser_player(internalId, sUrl,
-                    // fOnFinish
-                    function() {
-                      parent.show();
-                      parent.focus();
-                    }
-                  );
-
-                  parent.blur();
-                },
-              },
-              oArgs: {
-                parent: HED.window.get(),
-              }
-            };
-            browser = HED.window.create(oOptions);
-            browser.focus();
-            */
-                         
-            if (buffer==true){
-             Options = {
-                url:  JsonResponse["Url"],
-                title: JsonResponse["Title"],
-                load: Load,
-                cbmx : function(reason, args){
-                  if (reason=="play-ok"){
-                    HED.window.get().blur();
-                    HED.window.get().hide();
-                  }
-
-                  if (reason=="play-error"){
-                    HED.window.get().focus();
-                    HED.window.get().show();
-                    alert("Se ha producido un error al reproducir el vídeo\n" + JsonResponse["Url"])
-                  }
-                  if (reason=="server-nostreams"){
-                    HED.window.get().focus();
-                    HED.window.get().show();
-                    alert("Se ha producido un error al reproducir el vídeo\n" + JsonResponse["Url"])
-                  }
-                  if (reason=="play-finish"){
-                    HED.window.get().focus();
-                    HED.window.get().show();
-                  }
-                  if (reason=="play-stop"){
-                    HED.window.get().focus();
-                    HED.window.get().show();
-                  }
-                
-                },
-
-
-              }
-              HED.helpers.play(Options);
-              HED.window.get().blur();
-              HED.window.get().hide();
-             }else{
-             
-             if (JsonResponse["Url"].indexOf("http://") == 0) {
-              Type = "http";
-              Options = { 'path' : JsonResponse["Url"].slice(7) };
-             }else if (JsonResponse["Url"].indexOf("/") == 0) {
-             Type = "file";
-              Options = { 'file' : JsonResponse["Url"]};            
-             }else{
-              Type = "custom";
-              Options = { 'url' : JsonResponse["Url"]};
-             }
-             HED.avmedia.play( 
-                  
-                  {
-                     'type': Type,
-                     'options': Options,
-                     'resume':  true,
-                     'details': {
-                        'name': JsonResponse["Title"], 
-                        'contextmenu': {
-                            'duration': 0,
-                            'options': [],
-                            'render': {},
-                            'keyHandler': {},
-                            'controls': ["pfr", "stop", "play", "pff", "audio", "subs"],
-                            'hideProgressBar': false
-                        }
-                     }      
-                  },
-                  function(oResult){HED.window.get().blur();HED.window.get().hide();},
-                  function(oError){alert("Se ha producido un error al reproducir el vídeo\n" + JsonResponse["Url"])},
-                  {
-                     'onStart': function(pObject){HED.window.get().blur();HED.window.get().hide();},
-                     'onFinish': function(pObject){HED.window.get().focus();HED.window.get().show();}
-                  }); 
-             }
             EnviarDatos("OK");
             CerrarLoading()
+            if(!new RegExp("^(.+://)").test(JsonResponse["Url"])){
+             JsonResponse["Url"] = JsonResponse["Host"]+"/local-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"}
+             
+            else if(new RegExp("^(?:http\://.*?\.vkcache\.com)").test(JsonResponse["Url"])){
+            
+             JsonResponse["Url"] = JsonResponse["Host"]+"/netutv-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"} 
+            
+            ProxyUrl = JsonResponse["Host"]+"/remote-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"
+            Lista  = '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play(\''+JsonResponse["Url"]+'\',\''+btoa(JsonResponse["Title"])+'\')" class="Lista"><h3>Abrir Enlace</h3></a></li>';
+            Lista += '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play_VLC(\''+JsonResponse["Url"]+'\',\''+btoa(JsonResponse["Title"])+'\')" class="Lista"><h3>Plugin VLC</h3></a></li>';
+            Lista += '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play_HTML(\''+ProxyUrl+'\',\''+btoa(JsonResponse["Title"])+'\')" class="Lista"><h3>Video HTML</h3></a></li>';
+            AbrirLista("Elige el Reproductor",Lista)
+
             break;
         case "Update":
             DescargarContenido(JsonResponse["Url"]);
@@ -1284,7 +1101,7 @@ function GetResponses(data) {
             Lista = "";
             for (var key in Opciones) {
                 if (Opciones.hasOwnProperty(key)) {
-                    Secciones += '<a href="javascript:void(0)" class="Boton" onclick="MostrarSeccion(\'' + key + '\')">' + key + '</a>\n';
+                    Secciones += '<a href="javascript:void(0)" class="Boton" onmouseover="this.focus()" onclick="MostrarSeccion(\'' + key + '\')">' + key + '</a>\n';
                     Lista +=
                         '<ul class="ListItem" style="display:none" id="Config-' + key + '">' + Opciones[key] + '</ul>';
                 }
@@ -1297,6 +1114,27 @@ function GetResponses(data) {
             break;
     }
 }
+function Play(Url,Title){
+  window.open(Url);
+}
+
+function Play_VLC(Url,Title){
+  HtmlItem =
+      '<div class="VideoCaja"><div class="VideoContenido"><object classid="clsid:9BE31822-FDAD-461B-AD51-BE1D1C159921" codebase="http://downloads.videolan.org/pub/videolan/vlc/latest/win32/axvlc.cab" id="vlc" events="False" style="width:100%; height:100%"><param name="Src" value="' +
+      Url +
+      '"></param><param name="ShowDisplay" value="True" ></param><param name="AutoLoop" value="no"></param><param name="AutoPlay" value="yes"></param><embed type="application/x-google-vlc-plugin" name="vlcfirefox" autoplay="yes" loop="no" width="100%" height="100%" target="' +
+      Url + '"></embed></object></div></div>';
+  AbrirPlayer(Title,HtmlItem)
+
+}
+
+function Play_HTML(Url,Title){
+  HtmlItem =
+      '<div class="VideoCaja"><div class="VideoContenido"><video class="Reproductor" id="media" type="application/x-mplayer2" width="100%" height="100%" autoplay="true" controls="true" src="' +
+      Url + '"></div></div>';
+  AbrirPlayer(Title,HtmlItem)
+}
+
 function ImgError(obj){
   if (obj.src.indexOf("http://") == 0){
   
