@@ -1,163 +1,138 @@
 # -*- coding: utf-8 -*-
-#------------------------------------------------------------
-# Gestión de parámetros de configuración multiplataforma
-#------------------------------------------------------------
-# pelisalacarta
-# http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
-#------------------------------------------------------------
-# Creado por: Jesús (tvalacarta@gmail.com)
+#-------------------------------------------------------------------------------
+# Gestión de parámetros de configuración - Server
+#-------------------------------------------------------------------------------
+# tvalacarta
+# http://blog.tvalacarta.info/plugin-xbmc/tvalacarta/
+#-------------------------------------------------------------------------------
+# Creado por: 
+# Jesús (tvalacarta@gmail.com)
 # Licencia: GPL (http://www.gnu.org/licenses/gpl-3.0.html)
-#------------------------------------------------------------
-# Historial de cambios:
-#------------------------------------------------------------
+#-------------------------------------------------------------------------------
+import os,re
+from core.item import Item
+import logger
+PLATFORM_NAME="mediaserver"
 
-import platform_name
-import os
-PLATFORM_NAME = platform_name.PLATFORM_NAME
-exec "from platformcode."+PLATFORM_NAME+" import logger"
-exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-
-def force_platform(platform_name):
-    global PLATFORM_NAM
-    PLATFORM_NAME = platform_name
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-
-def get_platform():
-    return PLATFORM_NAME
-
-def get_library_support():
-    return (PLATFORM_NAME=="xbmc" or PLATFORM_NAME=="xbmcdharma" or PLATFORM_NAME=="xbmceden" or PLATFORM_NAME=="boxee")
-
-def get_system_platform():
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    return platformconfig.get_system_platform()
-
+settings_dic ={}
+    
 def open_settings():
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    return platformconfig.open_settings()
+    Opciones =[]
+    from xml.dom import minidom
+    settings=""
+    while len(settings)<> os.path.getsize(menufilepath) or len(settings)==0:
+      settings = open(menufilepath, 'rb').read()
+    xmldoc= minidom.parseString(settings)
+    for category in xmldoc.getElementsByTagName("category"):
+      for setting in category.getElementsByTagName("setting"):
+        if setting.getAttribute("type") =="sep":
+          Opciones.append(["" ,"" , setting.getAttribute("type") ,"" ,"" ,"","","",category.getAttribute("label")])
+        else:
+          Opciones.append([setting.getAttribute("label") ,setting.getAttribute("id") , setting.getAttribute("type") ,setting.getAttribute("lvalues") ,setting.getAttribute("values") ,get_setting(setting.getAttribute("id")),setting.getAttribute("option"),setting.getAttribute("enabled"),category.getAttribute("label")])
+    from platformcode import cliente
+    cliente.Acciones().AbrirConfig(Opciones)
 
-def get_setting(name,channel=""):
-    if channel =="":   
-      exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"  
-      dev=platformconfig.get_setting(name)
-    if channel !="":          
-      from xml.dom import minidom
-      rutacanal = os.path.join(get_data_path(), channel+".xml")
-      settings=""
-      encontrado = False
-      #Lee el archivo XML (si existe)
-      if os.path.exists(rutacanal):
-        while len(settings)<> os.path.getsize(rutacanal) or len(settings)==0:
-          settings = open(rutacanal, 'rb').read()
-        xmldoc= minidom.parseString(settings)
-        dev=""
-        #Busca el elemento y dvuelve el valor
-        for setting in xmldoc.getElementsByTagName("setting"):
-          if setting.getAttribute("id") == name:
-            dev = setting.getAttribute("value").encode("utf8")
-            encontrado = True
-    
-      if encontrado == False:
-        dev=""
-        logger.error("clave: "+ name  + " no encontrada en canal: " + channel)
-    
-    return dev
-
-def set_setting(name,value, channel=""):
-
-    if channel!="":
-      from xml.dom import minidom
-      rutacanal = os.path.join(get_data_path(), channel+".xml")
-      settings=""
-      guardado = False
-      #Crea un Nuevo XML vacio
-      new_settings = minidom.getDOMImplementation().createDocument(None, "settings", None)
-      new_settings_root = new_settings.documentElement
-      #Lee el XML antiguo (Si Existe)
-      if os.path.exists(rutacanal):
-        while len(settings)<> os.path.getsize(rutacanal) or len(settings)==0:
-          settings = open(rutacanal, 'rb').read()
-          xmldoc= minidom.parseString(settings)
-      
-        #Pasa todos los elementos al XML Nuevo (Modificando el valor del elemento que se quiere cambiar)
-        for setting in xmldoc.getElementsByTagName("setting"):
-          nodo = new_settings.createElement("setting")
-          if setting.getAttribute("id") == name:
-            nodo.setAttribute("value",value)
-            guardado = True
-          else:
-            nodo.setAttribute("value",setting.getAttribute("value"))
-          nodo.setAttribute("id",setting.getAttribute("id"))    
-          new_settings_root.appendChild(nodo)
-        
-      #Si el elemento no estaba en el XML antiguo crea uno nuevo con el valor pasado
-      if guardado ==False:
-        nodo = new_settings.createElement("setting")
-        nodo.setAttribute("value",value)
-        nodo.setAttribute("id",name)    
-        new_settings_root.appendChild(nodo)
-      #Guarda los datos
-      fichero = open(os.path.join( get_data_path() , channel+".xml" ), "w")
-      fichero.write(new_settings.toprettyxml(encoding='utf-8'))
-      fichero.close()
-    
+ 
+def get_setting(name):
+    global settings_dic
+    if name in settings_dic:
+      return settings_dic[name]
     else:
-      exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-      platformconfig.set_setting(name,value)
+      return ""
 
-def save_settings():
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    platformconfig.save_settings()
+    
+def load_settings():
+    global settings_dic
+    defaults = {}
+    from xml.etree import ElementTree
+    settings=""
+    encontrado = False
+    #Lee el archivo XML (si existe)
+    if os.path.exists(configfilepath):
+      while len(settings)<> os.path.getsize(configfilepath) or len(settings)==0:
+        settings = open(configfilepath, 'rb').read()
+      root = ElementTree.fromstring(settings)
+      for target in root.findall("setting"):
+        settings_dic[target.get("id")] = target.get("value")
+
+          
+
+    defaultsettings=""
+    while len(defaultsettings)<> os.path.getsize(menufilepath) or len(defaultsettings)==0:
+      defaultsettings = open(menufilepath, 'rb').read()
+    root = ElementTree.fromstring(defaultsettings)
+    for category in root.findall("category"):
+      for target in category.findall("setting"):
+        if target.get("id"):
+          defaults[target.get("id")] = target.get("default")
+      
+    for key in defaults:
+      if not key in settings_dic:
+        settings_dic[key] =  defaults[key]
+    set_settings(settings_dic)
+
+
+def set_setting(name,value):
+    settings_dic[name]=value
+    from xml.dom import minidom
+    #Crea un Nuevo XML vacio
+    new_settings = minidom.getDOMImplementation().createDocument(None, "settings", None)
+    new_settings_root = new_settings.documentElement
+    
+    for key in settings_dic:
+      nodo = new_settings.createElement("setting")
+      nodo.setAttribute("value",settings_dic[key])
+      nodo.setAttribute("id",key)    
+      new_settings_root.appendChild(nodo)
+      
+    fichero = open(configfilepath, "w")
+    fichero.write(new_settings.toprettyxml(encoding='utf-8'))
+    fichero.close()
+
+def set_settings(JsonRespuesta):
+    for Ajuste in JsonRespuesta:
+      settings_dic[Ajuste]=JsonRespuesta[Ajuste].encode("utf8")
+    from xml.dom import minidom
+    #Crea un Nuevo XML vacio
+    new_settings = minidom.getDOMImplementation().createDocument(None, "settings", None)
+    new_settings_root = new_settings.documentElement
+    
+    for key in settings_dic:
+      nodo = new_settings.createElement("setting")
+      nodo.setAttribute("value",settings_dic[key])
+      nodo.setAttribute("id",key)    
+      new_settings_root.appendChild(nodo)
+      
+    fichero = open(configfilepath, "w")
+    fichero.write(new_settings.toprettyxml(encoding='utf-8'))
+    fichero.close()
+    
+
 
 def get_localized_string(code):
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    return platformconfig.get_localized_string(code)
-
-def get_library_path():
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    return platformconfig.get_library_path()
-
-def get_temp_file(filename):
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    return platformconfig.get_temp_file(filename)
-
-def get_runtime_path():
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    return platformconfig.get_runtime_path()
+    translationsfile = open(TRANSLATION_FILE_PATH,"r")
+    translations = translationsfile.read()
+    translationsfile.close()
+    cadenas = re.findall('<string id="%d">([^<]+)<' % code,translations)
+    if len(cadenas)>0:
+        return cadenas[0]
+    else:
+        return "%d" % code
 
 def get_data_path():
-    exec "import platformcode."+PLATFORM_NAME+".config as platformconfig"
-    return platformconfig.get_data_path()
+    return os.path.join( os.path.expanduser("~") , ".pelisalacarta" )
 
-def get_thumbnail_path():
-    WEB_PATH = ""
-    thumbnail_type = get_setting("thumbnail_type")
-    if thumbnail_type=="":
-        thumbnail_type="2"
-    if thumbnail_type=="0":
-        WEB_PATH = "http://pelisalacarta.mimediacenter.info/posters/"
-    elif thumbnail_type=="1":
-        WEB_PATH = "http://pelisalacarta.mimediacenter.info/banners/"
-    elif thumbnail_type=="2":
-        WEB_PATH = "http://pelisalacarta.mimediacenter.info/squares/"
-    return WEB_PATH
-    
-    
+def get_runtime_path():
+    return os.getcwd()
 # Test if all the required directories are created
 def verify_directories_created():
     logger.info("Comprobando directorios")
-    # Create data_path if not exists
-    if not os.path.exists(get_data_path()):
-        logger.debug("Creating data_path: "+get_data_path())
-        try:
-            os.mkdir(get_data_path())
-        except:
-            pass
+    if not os.path.exists(get_data_path()): os.mkdir(get_data_path())
     
-    config_paths = [["library_path",     "Biblioteca"],
-                    ["downloadpath",     "Descargas"],
-                    ["downloadlistpath", os.path.join("Descargas","Lista")],
-                    ["bookmarkpath",     "Favoritos"],
+    config_paths = [["library_path",     "Library"],
+                    ["downloadpath",     "Downloads"],
+                    ["downloadlistpath", os.path.join("Downloads","List")],
+                    ["bookmarkpath",     "Favorites"],
                     ["cache.dir",        "Cache"],
                     ["cookies.dir",      "Cookies"]]
                              
@@ -168,16 +143,31 @@ def verify_directories_created():
           set_setting(setting , path)
           
       if not get_setting(setting).lower().startswith("smb") and not os.path.exists(get_setting(setting)):
-        logger.debug("Creating " + setting +": " +get_setting(setting))
-        try:
-            os.mkdir(get_setting(setting))
-        except:
-            pass
-
-
-          
-
-
-
-
-
+        os.mkdir(get_setting(setting))
+                    
+            
+def get_thumbnail_path(preferred_thumb=""):
+    WEB_PATH = ""
+    
+    if preferred_thumb=="":
+        thumbnail_type = get_setting("thumbnail_type")
+        if thumbnail_type=="": thumbnail_type="2"
+        
+        if thumbnail_type=="0":
+            WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/posters/"
+        elif thumbnail_type=="1":
+            WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/banners/"
+        elif thumbnail_type=="2":
+            WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/squares/"
+    else:
+        WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/"+preferred_thumb+"/"
+        
+    return WEB_PATH
+    
+# Fichero de configuración
+menufilepath= os.path.join(get_runtime_path(),"platformcode", "settings.xml")
+configfilepath = os.path.join( get_data_path() , "settings.xml")
+if not os.path.exists(get_data_path()): os.mkdir(get_data_path())   
+# Literales
+TRANSLATION_FILE_PATH = os.path.join(get_runtime_path(),"resources","language","Spanish","strings.xml")
+load_settings()

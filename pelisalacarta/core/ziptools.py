@@ -10,8 +10,7 @@ import logger
 
 class ziptools:
 
-    def extract(self, file, dir, progress =False):
-        import guitools
+    def extract(self, file, dir):
         logger.info("file=%s" % file)
         logger.info("dir=%s" % dir)
         
@@ -21,10 +20,9 @@ class ziptools:
         zf = zipfile.ZipFile(file)
         self._createstructure(file, dir)
         num_files = len(zf.namelist())
-        dprogress = guitools.Dialog_Progress("Extrayendo Archivos...","Iniciando")
-        for x, name in enumerate(zf.namelist()):
+
+        for name in zf.namelist():
             logger.info("name=%s" % name)
-            dprogress.Actualizar(x*100 / len(zf.namelist()),"Extrayendo archivo " + str(x) + " de " + str(len(zf.namelist())) + "\n" + name)
             if not name.endswith('/'):
                 logger.info("no es un directorio")
                 try:
@@ -41,7 +39,6 @@ class ziptools:
                     outfile.write(zf.read(name))
                 except:
                     logger.info("Error en fichero "+name)
-        dprogress.Cerrar()
 
     def _createstructure(self, file, dir):
         self._makedirs(self._listdirs(file), dir)
@@ -68,18 +65,3 @@ class ziptools:
 
         dirs.sort()
         return dirs
-        
-    def _listdirsandfiles(self, file):
-        zf = zipfile.ZipFile(file)
-        dirs = []
-        files = []
-        for name in zf.namelist():
-            if name.endswith('/'):
-                dirs.append(name)
-            else:
-                files.append(name)
-
-        dirs.sort(key=lambda item: len(item.split("/")))
-        files.sort(key=lambda item: len(item.split("/")))
-        
-        return dirs, files

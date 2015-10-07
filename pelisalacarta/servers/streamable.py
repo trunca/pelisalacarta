@@ -15,17 +15,8 @@ from core import jsunpack
 
 def test_video_exists( page_url ):
     logger.info("streamable test_video_exists(page_url='%s')" % page_url)
-    data = scrapertools.cache_page(page_url)
-    try:
-      error = scrapertools.find_single_match(data,'<div class="left errorBox" style="width: 958px;">Error<div style="font-size:16px;">(.*?)</div></div>')
-    except:
-      error =None
-      
-    if error:
-      return False,error
-      
-    else:
-      return True,""
+    
+    return True,""
 
 def get_video_url( page_url , premium = False , user="" , password="", video_password="" ):
     logger.info("streamable get_video_url(page_url='%s')" % page_url)
@@ -57,8 +48,8 @@ def find_videos(data):
     encontrados = set()
     devuelve = []
 
-    #http://www.streamable.ch/video/1WfcHvq1x
-    patronvideos  = 'http://www.streamable.ch/video/([a-zA-Z0-9]+)'
+    # http://powvideo.net/embed-sbb9ptsfqca2
+    patronvideos  = 'http://www.streamable.ch/video/([a-z0-9]+)'
     logger.info("streamable find_videos #"+patronvideos+"#")
     matches = re.compile(patronvideos,re.DOTALL).findall(data)
 

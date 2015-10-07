@@ -63,7 +63,7 @@ def download(item, VideoItem=Item(url=["",""]), Reproducir =  False):
         info = lt.torrent_info(bencode.bdecode(data))
         f.close()
       else:
-        data = scrapertools.downloadpage(item.url)
+        data = scrapertools.downloadpage(item.url, addheaders=[["Referer",item.url]])
         info = lt.torrent_info(bencode.bdecode(data))
       
       torrent = session.add_torrent({'ti':info     , 'save_path':save_path_videos, 'storage_mode':lt.storage_mode_t.storage_mode_allocate})
@@ -83,34 +83,66 @@ def download(item, VideoItem=Item(url=["",""]), Reproducir =  False):
           pDialog.Cerrar()
           Cancelado =True
           break
-      Progreso(session,torrent,pDialog,Time)
+      Progreso(session,torrent,pDialog,Time,0)
       
     #Obtenemos la info del Torrent
     if torrent.has_metadata():
       info = torrent.get_torrent_info()
-
-      #Buscamos el archivo del vídeo, en principio es el de mayor tamaño.
+      VideoFiles=[]
+      SrtFiles=[]
+      Files = []
       for f in info.files():
-        if f.size > video_file_size:
-          video_file_size = f.size
-          video_file_path = f.path.decode("utf8")
-          video_file = os.path.basename(video_file_path)
+        Size = 0
+        for file in Files:
+          Size += file["Size"]
+
+        Start = int(Size / info.piece_length())
+        End = int((Size + f.size) / info.piece_length()) 
+        Files.append({"Start":Start, "End" : End, "Size": f.size, "Path" : f.path})
+        
+        
+      VideoExtensions =  ["avi", "mp4", "mkv", "flv", "mpeg", "ts"]  
+      
+      for file in Files:
+        if file["Path"].split(".")[len( file["Path"].split("."))-1].lower() in VideoExtensions:
+          VideoFiles.append(file)
+
+        elif file["Path"].split(".")[len(file["Path"].split("."))-1].lower() =="srt":
+         SrtFiles.append(file)
+
           
-      VideoItem.url[1] = os.path.join(save_path_videos,video_file_path.encode("utf8"))
+      VideoItem.url[1] = os.path.join(save_path_videos, VideoFiles[0]["Path"].encode("utf8"))
+      
       
       #Loop para controlar la descarga
       ReproduccionIniciada = False
       IniciarAutomatico = Reproducir
+      
       while (not torrent.is_seed()):
           time.sleep(1)
-          Progreso(session,torrent,pDialog,Time)
+          VideoFile = VideoFiles[0]
+          PiezaLista = VideoFile["Start"]
+          for x in range(VideoFile["Start"],VideoFile["End"]- VideoFile["Start"] +1):
+            if torrent.status().pieces[x]: 
+              PiezaLista = x
+            else:
+              break
+              
+
+
+          #Los Srt Primero      
+          if len(SrtFiles):
+            SrtFile = SrtFiles[0]
+            for x in range(SrtFile["Start"],SrtFile["End"]- SrtFile["Start"] +1):
+              torrent.piece_priority(x,7)
+          Progreso(session,torrent,pDialog,Time,PiezaLista)
           
           #Si se cierra el reproductor, vuelve a mostrar el progreso
           if not guitools.isPlaying() and ReproduccionIniciada:
             ReproduccionIniciada = False
             IniciarAutomatico = False
             pDialog = guitools.Dialog_Progress(__module__,"")
-            Progreso(session,torrent,pDialog,Time)
+            Progreso(session,torrent,pDialog,Time,PiezaLista)
 
           #Para cancelar la descarga
           if not guitools.isPlaying() and pDialog.IsCanceled():
@@ -190,7 +222,7 @@ def download(item, VideoItem=Item(url=["",""]), Reproducir =  False):
       
 
 
-def Progreso(session,torrent,pDialog,Time):
+def Progreso(session,torrent,pDialog,Time, PiezaLista):
   s= torrent.status()
   if session.dht_state() is not None:
       DHT=str(session.status().dht_nodes)
@@ -203,11 +235,11 @@ def Progreso(session,torrent,pDialog,Time):
     trackers+=1
 
   Estados = ['En Cola', 'Comprobando', 'Descargando Metadatos', 'Descargando', 'Finalizado', 'Seeding', 'Allocating', 'Checking fastresume']
-  Mensaje  = 'Tiempo: %s Estado: %.1f%% - %s \n'
+  Mensaje  = 'Tiempo: %s Estado: %.1f%% - %s Piezas listas: %i\n'
   Mensaje += 'Descarga:%.1f kb/s Subida:%.1f kB/s \n'
   Mensaje += 'Peers:%d Seeds:%d Nodos DHT:%s Trackers: %i' 
 
-  Mensaje  = Mensaje % (time.strftime("%H:%M:%S", time.gmtime(time.time() - Time)),s.progress * 100, Estados[s.state], s.download_rate / 1000, s.upload_rate / 1000,s.num_peers, s.num_seeds,DHT,trackers)
+  Mensaje  = Mensaje % (time.strftime("%H:%M:%S", time.gmtime(time.time() - Time)),s.progress * 100, Estados[s.state], PiezaLista, s.download_rate / 1000, s.upload_rate / 1000,s.num_peers, s.num_seeds,DHT,trackers)
   Progreso = int(s.progress * 100)
   pDialog.Actualizar(Progreso, Mensaje)
   

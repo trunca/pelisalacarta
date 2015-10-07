@@ -7,47 +7,76 @@
 
 import urlparse,urllib2,urllib,re
 import sys
+import xbmc
 import string
+import xbmcgui
+import xbmcplugin
 
-
-
+import gdata.youtube
+import gdata.youtube.service
 from servers import youtube
 
+from platformcode import xbmctools
 from core import scrapertools
 from core import logger
 from core import config
-from core.item import Item
+
 import os
+CHANNELNAME = "trailertools"
 
-DEBUG = config.get_setting("debug")
+DEBUG = True
+IMAGES_PATH = xbmc.translatePath( os.path.join( config.get_data_path(), 'resources' , 'images'  ) )
 
-__type__ = "generic"
-__title__ = "Trailers"
-__channel__ = "trailertools"
-
-logger.info("[trailertools.py] init")
-
-def isGeneric():
-    return True
-
-def mainlist(item):
-  itemlist=[]
-  logger.info("[trailertools.py] mainlist")
-  itemlist =[]
-  itemlist.append( Item(channel="trailertools", action="search", title="Buscar Trailer...", thumbnail="http://pelisalacarta.mimediacenter.info/squares/search.png"))
-
-  return itemlist
+def mainlist(params,url,category):
+    logger.info("[trailertools.py] mainlist")
+    titulo = ""
+    listavideos = GetTrailerbyKeyboard(titulo,category)
+    if len(listavideos)>0:
+        for video in listavideos:
+            titulo = video[1]
+            url        = video[0]
+            thumbnail  = video[2]
+            xbmctools.addnewvideo( "trailertools" , "youtubeplay" , category , "Directo" ,  titulo , url , thumbnail , "Ver Video" )
+            
+    xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=category )
+    xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_NONE )
+    xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True )        
     
-
-def search(item, texto):
-  item.title=texto
-
-  return buscartrailer(item)
-        
-        
+def buscartrailer(params,url,category):
+    print "[trailertools.py] Modulo: buscartrailer()"
+    thumbnail = ""
+    solo = "false"
+    videotitle = title = urllib.unquote_plus( params.get("title") ).strip()
+    if ":]" in videotitle:
+        solo = "true"
+        videotitle = re.sub("\[[^\]]+\]","",videotitle).strip()
+    if config.get_localized_string(30110) in videotitle: #"Buscar trailer para"
+        videotitle = videotitle.replace(config.get_localized_string(30110),"").strip()
+    if config.get_localized_string(30111) in videotitle: #"Insatisfecho?, busca otra vez : "
+        videotitle = videotitle.replace(config.get_localized_string(30111),"").strip()
+    
+        listavideos = GetTrailerbyKeyboard(videotitle.strip(),category)
+    else:
+        listavideos = gettrailer(videotitle.strip().strip(),category,solo)
+    
+    if len(listavideos)>0:
+        for video in listavideos:
+            titulo = video[1]
+            url        = video[0]
+            thumbnail  = video[2]
+            duracion = video[3]
+            xbmctools.addnewvideo( "trailertools" , "youtubeplay" , category , "youtube" ,  titulo , url , thumbnail , "Ver Video","",duracion )
+    
+    xbmctools.addnewfolder( CHANNELNAME , "buscartrailer" , category , config.get_localized_string(30111)+" "+videotitle , url , os.path.join(IMAGES_PATH, 'trailertools.png'), "" ) #"Insatisfecho?, busca otra vez : "        
+    # Propiedades
+    xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=category )
+    xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_NONE )
+    xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True )
+    
+    
 def GetFrom_Trailersdepeliculas(titulovideo):
-    logger.info("[trailertools.py] Modulo: GetFrom_Trailersdepeliculas(titulo = %s)"  % titulovideo)
-    itemlist = []
+    print "[trailertools.py] Modulo: GetFrom_Trailersdepeliculas(titulo = %s)"  % titulovideo
+    devuelve = []
 
     titulo = LimpiarTitulo(titulovideo)
     # ---------------------------------------
@@ -63,24 +92,27 @@ def GetFrom_Trailersdepeliculas(titulovideo):
     patronvideos = "<td><h2><a href='([^']+)'>(.*?)<.*?src='([^']+)'.*?"
     matches  = re.compile(patronvideos,re.DOTALL).findall(urldata)
     if len(matches)>0:
-        for urlpage, title, tubmnail in matches:
-            logger.info("Trailers encontrados en www.trailerdepeliculas.org :  "+title)
-            
-            if titulo in string.lower(LimpiarTitulo(title)):
-                urlpage = urlparse.urljoin(url1,urlpage)
-                thumbnail = urlparse.urljoin(url1,thumbnail)
+        patronvideos = 'movie" value="http://www.youtube.com([^"]+)"'
+        for match in matches:
+            logger.info("Trailers encontrados en www.trailerdepeliculas.org :  "+match[1])
+            if titulo in (string.lower(LimpiarTitulo(match[1]))):
+                urlpage = urlparse.urljoin(url1,match[0])
+                thumbnail = urlparse.urljoin(url1,match[2])
                 data     = scrapertools.cachePage(urlpage)
-                logger.info("Trailer elegido :  "+title)
-                
-                patronvideos = 'movie" value="http://www.youtube.com([^"]+)"'
+                logger.info("Trailer elegido :  "+match[1])
                 matches2 = re.compile(patronvideos,re.DOTALL).findall(data)
-                
-                for link in matches2:
-                    logger.info("link yt del Trailer encontrado :  "+link)
-                    itemlist.append(Item(channel="trailertools", action="play", server="youtube", title=title, url=link, tumbnail=thumbail))
-
-    logger.info('%s Trailers encontrados en Modulo: GetFrom_Trailersdepeliculas()' % str(len(itemlist)))
-    return itemlist
+                for match2 in matches2:
+                    logger.info("link yt del Trailer encontrado :  "+match2)
+                    c=c+1
+                    devuelve.append( [match2, match[1] , thumbnail,""] )
+                    #scrapedthumbnail = match[2]
+                    #scrapedtitle     = match[1]
+                    #scrapedurl       = match[0]
+            
+            
+        logger.info(" lista de links encontrados U "+str(len(match)))
+    print '%s Trailers encontrados en Modulo: GetFrom_Trailersdepeliculas()' % str(c)
+    return devuelve
 
 def GetFromYoutubePlaylist(titulovideo):
     print "[trailertools.py] Modulo: GetFromYoutubePlaylist(titulo = %s)"  % titulovideo
@@ -130,40 +162,94 @@ def GetFromYoutubePlaylist(titulovideo):
     print '%s Trailers encontrados en Modulo: GetFromYoutubePlaylist()' % str(c)
     return devuelve
 
-def buscartrailer(item):
-    logger.info("[trailertools.py] - gettrailer: "+ item.title)
-    titulo = re.sub('\([^\)]+\)','',item.title)
-    sopa_palabras_invalidas = ("dvdrip" ,  "dvdscreener2" ,"tsscreener" , "latino" ,     # Esto es para peliculasyonkis o parecidos
-                               "dvdrip1",  "dvdscreener"  ,"tsscreener1", "latino1",
-                               "latino2",  "dvdscreener1" ,"screener"    ,
-                               "mirror" ,  "megavideo"    ,"vose"        , "subtitulada"
-                               )
+def gettrailer(titulovideo,category,solo="false"):
+
+    print "[trailertools.py] Modulo: gettrailer(titulo = %s , category = %s)"  % (titulovideo,category)
+
+    if not solo=="true":
+        titulo = re.sub('\([^\)]+\)','',titulovideo)
+        titulo = title = re.sub('\[[^\]]+\]','',titulo)
+
+        sopa_palabras_invalidas = ("dvdrip" ,  "dvdscreener2" ,"tsscreener" , "latino" ,     # Esto es para peliculasyonkis o parecidos
+                                   "dvdrip1",  "dvdscreener"  ,"tsscreener1", "latino1",
+                                   "latino2",  "dvdscreener1" ,"screener"    ,
+                                   "mirror" ,  "megavideo"    ,"vose"        , "subtitulada"
+                                   )
                                    
-    titulo = LimpiarTitulo(titulo)
-    logger.info("El titulo es :%s" %titulo)
-    trozeado = titulo.split()
-    for trozo in trozeado:
-        if trozo in sopa_palabras_invalidas:
-            titulo = titulo.replace(trozo ,"")
-    titulo = re.sub(' $','',titulo)
-    titulo = titulo.replace("ver pelicula online vos","").strip()
-    titulo = titulo.replace("ver pelicula online","").strip()
-    titulo = titulo.replace("mirror 1","").strip()
-    titulo = titulo.replace("parte 1","").strip()
-    titulo = titulo.replace("part 1","").strip()
-    titulo = titulo.replace("pt 1","").strip()        
-    titulo = titulo.replace("peliculas online","").strip()
-    
-    itemlist = []
-    if len(titulo)==0:
-        titulo = "El_video_no_tiene_titulo"
+        titulo = LimpiarTitulo(titulo)
+        print "el tituloooo es :%s" %titulo
+        
+        trozeado = titulo.split()
+        for trozo in trozeado:
+            if trozo in sopa_palabras_invalidas:
+                titulo = titulo.replace(trozo ,"")
+        titulo = re.sub(' $','',titulo)
+        titulo = titulo.replace("ver pelicula online vos","").strip()
+        titulo = titulo.replace("ver pelicula online","").strip()
+        titulo = titulo.replace("mirror 1","").strip()
+        titulo = titulo.replace("parte 1","").strip()
+        titulo = titulo.replace("part 1","").strip()
+        titulo = titulo.replace("pt 1","").strip()        
+        titulo = titulo.replace("peliculas online","").strip()
+        encontrados = []
+        if len(titulo)==0:
+            titulo = "El_video_no_tiene_titulo"
 
-    itemlist.extend(GetFrom_Trailersdepeliculas(titulo))    # Primero busca en www.trailerdepeliculas.org
-    itemlist.extend(GetVideoFeed(titulo) )                  # luego busca con el API de youtube 
-    itemlist.extend(GetFromYoutubePlaylist(titulo))       # si no encuentra, busca en las listas de la web de youtube
+        encontrados = GetFrom_Trailersdepeliculas(titulo)      # Primero busca en www.trailerdepeliculas.org
+        encontrados  = encontrados + GetVideoFeed(titulo)      # luego busca con el API de youtube 
+    else:
+        titulo = titulovideo
+        encontrados = []
+        if len(titulo)==0:
+            titulo = "El_video_no_tiene_titulo"
+        encontrados  = encontrados + GetVideoFeed(titulo,"true")
+    if len(encontrados)>0:                                   # si encuentra algo, termina
+        return encontrados
+    else:
+        encontrados = GetFromYoutubePlaylist(titulo)       # si no encuentra, busca en las listas de la web de youtube
+        if len(encontrados)>0:
+            return encontrados
+        else:
+            respuesta = alertnoencontrado(titulo)          # si aun no encuentra,lanza mensaje de alerta y pregunta si quiere 
+            if respuesta:                                  # buscar, modificando el titulo, con el teclado 
+                encontrados = GetTrailerbyKeyboard(titulo,category) # si respuesta es afirmativa este entrara en un bucle 
+                if len(encontrados)>0:                       # de autollamadas hasta encontrar el trailer o la respuesta 
+                    return encontrados                       # del mensaje alerta sea negativo.
+                else:return []
+            else:
+                xbmcplugin.setPluginCategory( handle=int( sys.argv[ 1 ] ), category=category )
+                xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), sortMethod=xbmcplugin.SORT_METHOD_NONE )
+                xbmcplugin.endOfDirectory( handle=int( sys.argv[ 1 ] ), succeeded=True )
     
-    return itemlist
+    return encontrados
 
+def GetTrailerbyKeyboard(titulo,category,solo="false"):
+    print "[trailertools.py] Modulo: GetTrailerbyKeyboard(titulo = %s , category = %s)"  % (titulo,category)
+    devuelve = []
+    keyboard = xbmc.Keyboard('default','heading')
+    keyboard.setDefault(titulo)
+    if titulo == "":
+        keyboard.setHeading(config.get_localized_string(30112)) #"Introduce el Titulo a buscar"
+    else:
+        keyboard.setHeading(config.get_localized_string(30113)) #'Puedes recortar el titulo ó bien cambiar a otro idioma'
+    keyboard.doModal()
+    if (keyboard.isConfirmed()):
+        tecleado = keyboard.getText()
+        if len(tecleado)>0:
+            devuelve = gettrailer(tecleado,category,solo)
+            return devuelve
+        else:return []
+    else:return []    
+
+def alertnoencontrado(titulo):
+    advertencia = xbmcgui.Dialog()
+    #'Trailer no encontrado'
+    #'El Trailer para "%s"'
+    #'no se ha podido localizar.'
+    #'¿Deseas seguir buscando con el teclado?'
+    tituloq = '"'+titulo+'"'
+    resultado = advertencia.yesno(config.get_localized_string(30114), config.get_localized_string(30115) % tituloq, config.get_localized_string(30116),config.get_localized_string(30117))
+    return(resultado)
 def LimpiarTitulo(title):
         title = string.lower(title)
         #title = re.sub('\([^\)]+\)','',title)
@@ -242,74 +328,98 @@ def getpost(url,values): # Descarga la pagina con envio de un Form
 def youtube_search(texto):
     devuelve = []
 
-    # Fetch video list from YouTube feedz
-    data = scrapertools.cache_page( "https://www.youtube.com/results?search_query="+texto.replace(" ","+") )
-    data = scrapertools.get_match(data,'<div class="yt-uix-hovercard ad-info-container">(.*?)<div class="yt-uix-pager search-pager branded-page-box spf-link " role="navigation">')
-    patron  = '<li><div class="[^"]+" data-context-item-id="[^"]+" data-visibility-tracking="[^"]+"><div class="[^"]+"><div class="[^"]+"><a aria-hidden="true" href="([^"]+)" class="[^"]+" data-sessionlink="[^"]+"><div class="[^"]+"><img src="([^"]+)"(?: data-thumb="[^"]+")? width="[^"]+" height="[^"]+"/></div><span class="video-time" aria-hidden="true">([^<]+)</span></a>  <span class="[^"]+">[\n| | \t]*.*?</div><div class="yt-lockup-content"><h3 class="yt-lockup-title"><a href="[^"]+" class="[^"]+" data-sessionlink="[^"]+" title="([^"]+)" aria-describedby'
+    # Fetch video list from YouTube feed
+    data = scrapertools.cache_page( "https://gdata.youtube.com/feeds/api/videos?q="+texto.replace(" ","+")+"&orderby=published&start-index=1&max-results=50&v=2&lr=es" )
+    
     # Extract items from feed
-    matches = re.compile(patron,re.DOTALL).findall(data)
+    matches = re.compile("<entry(.*?)</entry>",re.DOTALL).findall(data)
 
-    for url, thumb, time, title in matches:
-        url = "http://www.youtube.com" + url
+    for entry in matches:
+        logger.info("entry="+entry)
+        # Not the better way to parse XML, but clean and easy
+        title = scrapertools.get_match(entry,"<titl[^>]+>([^<]+)</title>")
+        thumbnail = scrapertools.get_match(entry,"<media\:thumbnail url='([^']+)'")
+        try:
+            url = scrapertools.get_match(entry,"http\://www.youtube.com/watch\?v\=([0-9A-Za-z_-]{11})")
+        except:
+            url = scrapertools.get_match(entry,"https\://www.youtube.com/watch\?v\=([0-9A-Za-z_-]{11})")
 
-        devuelve.append( [ title,thumb,url ] )
+        devuelve.append( [ title,thumbnail,url ] )
+
     return devuelve
 
 def GetVideoFeed(titulo,solo="false"):
-    logger.info("[trailertools.py] Modulo: GetVideoFeed(titulo = %s)"  % titulo)
+    print "[trailertools.py] Modulo: GetVideoFeed(titulo = %s)"  % titulo
     if solo=="true":
         esp   = ""
         noesp = ""
     else:
         esp   = " trailer espanol"
         noesp = " trailer"
-    itemlist = []
+    devuelve = []
     encontrados = set()
     c = 0
     entries = youtube_search(titulo+esp)
     
     for title,thumbnail,url in entries:
-        logger.info( 'Video title: %s' % title)
+        print 'Video title: %s' % title
         titulo2 = title
         url = url
         duracion = ""
         if titulo in (string.lower(LimpiarTitulo(titulo2))): 
             if url not in encontrados:
-                itemlist.append(Item(channel="trailertools", action="play", server="youtube", title=titulo2, thumbnail=thumbnail, url=url))
+                devuelve.append([url,titulo2,thumbnail,""])
                 encontrados.add(url)
                 c = c + 1
             if c > 10:
-                return (itemlist)
+                return (devuelve)
 
     if c < 6:
         entries = youtube_search(titulo+esp)
         for title,thumbnail,url in entries:
-            logger.info( 'Video title: %s' % title)
+            print 'Video title: %s' % title
             titulo2 = title
             url = url
             duracion = ""
             if titulo in (string.lower(LimpiarTitulo(titulo2))): 
                 if url not in encontrados:
-                    itemlist.append(Item(channel="trailertools", action="play", server="youtube", title=titulo2, thumbnail=thumbnail, url=url))
+                    devuelve.append([url,titulo2,thumbnail,""])
                     encontrados.add(url)
                     c = c + 1
                 if c > 10:
-                    return (itemlist)
+                    return (devuelve)
     if c < 6:
         entries = youtube_search(titulo)
         for title,thumbnail,url in entries:
-            logger.info( 'Video title: %s' % title)
+            print 'Video title: %s' % title
             titulo2 = title
             url = url
             duracion = ""
             if titulo in (string.lower(LimpiarTitulo(titulo2))): 
                 if url not in encontrados:
-                    itemlist.append(Item(channel="trailertools", action="play", server="youtube", title=titulo2, thumbnail=thumbnail, url=url))
+                    devuelve.append([url,titulo2,thumbnail,""])
                     encontrados.add(url)
                     c = c + 1
                 if c > 10:
-                    return (itemlist)
+                    return (devuelve)
 
-    logger.info( '%s Trailers encontrados en Modulo: GetVideoFeed()' % str(c))
-    return itemlist
+    print '%s Trailers encontrados en Modulo: GetVideoFeed()' % str(c)
+    return (devuelve)
     
+def youtubeplay(params,url,category):
+    logger.info("[trailertools.py] youtubeplay")
+    #http://www.youtube.com/watch?v=byvXidWNf2A&feature=youtube_gdata
+    title = urllib.unquote_plus( params.get("title") )
+    thumbnail = urllib.unquote_plus( params.get("thumbnail") )
+    plot = "Ver Video"
+    server = "youtube"
+    #id = youtube.Extract_id(url)
+    #videourl = youtube.geturl(id)
+
+    xbmctools.play_video("Trailer",server,url,category,title,thumbnail,plot)
+
+    
+def alertaerror():
+    ventana = xbmcgui.Dialog()
+    ok= ventana.ok ("Plugin Pelisalacarta", "Uuppss...la calidad elegida en configuracion",'no esta disponible o es muy baja',"elijá otra calidad distinta y vuelva a probar")
+

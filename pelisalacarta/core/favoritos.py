@@ -13,21 +13,7 @@ import logger
 import samba
 from item import Item
 
-CHANNELNAME = "favoritos"
-DEBUG = config.get_setting("debug")
-BOOKMARK_PATH = config.get_setting( "bookmarkpath" )
-
-if not BOOKMARK_PATH.upper().startswith("SMB://"):
-    if BOOKMARK_PATH=="":
-        BOOKMARK_PATH = os.path.join( config.get_data_path() , "bookmarks" )
-    if not os.path.exists(BOOKMARK_PATH):
-        logger.debug("[favoritos.py] Path de bookmarks no existe, se crea: "+BOOKMARK_PATH)
-        os.mkdir(BOOKMARK_PATH)
-
-logger.info("[favoritos.py] path="+BOOKMARK_PATH)
-
-def isGeneric():
-    return True
+BOOKMARK_PATH = config.get_setting("bookmarkpath")
 
 def mainlist(item):
     logger.info("[favoritos.py] mainlist")
@@ -42,7 +28,6 @@ def mainlist(item):
     
     # Rellena el listado
     for fichero in ficheros:
-      logger.info(fichero)
       itemlist.append(LeerFavorito(fichero))
     return itemlist
 
@@ -54,10 +39,10 @@ def LeerFavorito(Nombre,Ruta=BOOKMARK_PATH):
     else:
         Archivo = open(os.path.join(Ruta, Nombre))
         
-    lines = Archivo.readlines()
+    JSONItem = Archivo.read()
     Archivo.close();
     item = Item()
-    item.deserialize(lines[0])
+    item.fromjson(JSONItem)
     if item.context:
       item.context +="|Eliminar,remove_from_favorites"
     else:
@@ -67,33 +52,14 @@ def LeerFavorito(Nombre,Ruta=BOOKMARK_PATH):
 
 def GuardarFavorito(item, Ruta=BOOKMARK_PATH):
     logger.info("[favoritos.py] GuardarFavorito")
-
+    import time
     # Lee todos los ficheros
     if usingsamba(Ruta):
         ficheros = samba.get_files(Ruta)
     else:
         ficheros = os.listdir(Ruta)
-    ficheros.sort()
-    
-    # Averigua el ÃƒÂºltimo nÃƒÂºmero
-    if len(ficheros)>0:
-        # XRJ: Linea problemÃƒÂ¡tica, sustituida por el bucle siguiente
-        #filenumber = int( ficheros[len(ficheros)-1][0:-4] )+1
-        filenumber = 1
-        for fichero in ficheros:
-            logger.info("[favoritos.py] fichero="+fichero)
-            try:
-                tmpfilenumber = int( fichero[0:8] )+1
-                if tmpfilenumber > filenumber:
-                    filenumber = tmpfilenumber
-            except:
-                pass
-    else:
-        filenumber=1
 
-    # Genera el nombre de fichero
-    from core import scrapertools
-    filename = '%08d-%s.txt' % (filenumber,scrapertools.slugify(item.title))
+    filename = str(int(time.time())) + ".json"
     fullfilename = os.path.join(Ruta,filename)
     logger.info("[favoritos.py] savebookmark filename="+filename)
     
@@ -101,14 +67,12 @@ def GuardarFavorito(item, Ruta=BOOKMARK_PATH):
     if item.refered_action: item.action = item.refered_action
     item.context =""
     item.file = fullfilename
-    filecontent = item.serialize()
+    filecontent = item.tojson()
 
     # Graba el fichero
+    import json
     if not usingsamba(Ruta):
-        bookmarkfile = open(fullfilename.decode("utf-8"),"w")
-        bookmarkfile.write(filecontent)
-        bookmarkfile.flush();
-        bookmarkfile.close()
+        open(fullfilename.decode("utf-8"),"w").write(filecontent)
     else:
         samba.write_file(filename, filecontent, Ruta)
 

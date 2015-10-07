@@ -34,7 +34,7 @@ def find_videos(data):
     encontrados = set()
     devuelve = []
 
-    patronvideos  = 'http://realvid.net/embed-([a-z0-9A-Z]+)'
+    patronvideos  = 'realvid.net/embed-([a-z0-9A-Z]+)'
     logger.info("[realvid.py] find_videos #"+patronvideos+"#")
     matches = re.compile(patronvideos,re.DOTALL).findall(data)
 
@@ -48,7 +48,7 @@ def find_videos(data):
         else:
             logger.info("  url duplicada="+url)
             
-    patronvideos  = 'http://realvid.net/([a-z0-9A-Z]+)'
+    patronvideos  = 'realvid.net/([a-z0-9A-Z]+)'
     logger.info("[realvid.py] find_videos #"+patronvideos+"#")
     matches = re.compile(patronvideos,re.DOTALL).findall(data)
 

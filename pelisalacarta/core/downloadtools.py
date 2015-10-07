@@ -23,7 +23,6 @@ import time
 import socket
 import config
 import logger
-import guitools
 
 entitydefs = {
     'AElig':    u'\u00C6', # latin capital letter AE = latin capital ligature AE, U+00C6 ISOlat1'
@@ -505,7 +504,12 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
     logger.info("[downloadtools.py] downloadfile: nombrefichero="+nombrefichero)
 
     try:
-       
+        # Si no es XBMC, siempre a "Silent"
+        try:
+            import xbmcgui
+        except:
+            silent=True
+        
         # antes
         #f=open(nombrefichero,"wb")
         try:
@@ -548,7 +552,8 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
     
         # Crea el diálogo de progreso
         if not silent:
-            progreso = guitools.Dialog_Progress("Descargando" , url +"\n"+ os.path.basename(nombrefichero) )
+            progreso = xbmcgui.DialogProgress()
+            progreso.create( "plugin" , "Descargando..." , url , nombrefichero )
             #progreso.create( "plugin" , "Descargando..." , os.path.basename(nombrefichero)+" desde "+urlparse.urlparse(url).hostname )
         else:
             progreso = ""
@@ -600,7 +605,7 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
             #print e.fp
             f.close()
             if not silent:
-                progreso.Cerrar()
+                progreso.close()
             # El error 416 es que el rango pedido es mayor que el fichero => es que ya está completo
             if e.code==416:
                 return 0
@@ -654,7 +659,7 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
                             #logger.info(sec_to_hms(tiempofalta))
                             if not silent:
                                 #progreso.update( percent , "Descargando %.2fMB de %.2fMB (%d%%)" % ( descargadosmb , totalmb , percent),"Falta %s - Velocidad %.2f Kb/s" % ( sec_to_hms(tiempofalta) , velocidad/1024 ), os.path.basename(nombrefichero) )
-                                progreso.Actualizar( percent , url +"\n"+ os.path.basename(nombrefichero) + "\n" + "%.2fMB/%.2fMB (%d%%) %.2f Kb/s %s falta " % ( descargadosmb , totalmb , percent , velocidad/1024 , sec_to_hms(tiempofalta)))
+                                progreso.update( percent , "%.2fMB/%.2fMB (%d%%) %.2f Kb/s %s falta " % ( descargadosmb , totalmb , percent , velocidad/1024 , sec_to_hms(tiempofalta)))
                         break
                     except:
                         reintentos = reintentos + 1
@@ -664,10 +669,10 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
                 
                 # El usuario cancelo la descarga
                 try:
-                    if progreso.IsCanceled():
+                    if progreso.iscanceled():
                         logger.info("Descarga del fichero cancelada")
                         f.close()
-                        progreso.Cerrar()
+                        progreso.close()
                         return -1
                 except:
                     pass
@@ -677,7 +682,7 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
                     logger.info("ERROR en la descarga del fichero")
                     f.close()
                     if not silent:
-                        progreso.Cerrar()
+                        progreso.close()
     
                     return -2
     
@@ -687,7 +692,7 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
 
                 f.close()
                 if not silent:
-                    progreso.Cerrar()
+                    progreso.close()
                 
                 #advertencia = xbmcgui.Dialog()
                 #resultado = advertencia.ok('Error al descargar' , 'Se ha producido un error' , 'al descargar el archivo')
@@ -696,7 +701,9 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
 
     except:
         if url.startswith("rtmp") and not silent:
-            guitools.Dialog_Ok( "No puedes descargar ese vídeo","Las descargas en RTMP aún no","están soportadas")
+            import xbmcgui
+            advertencia = xbmcgui.Dialog()
+            resultado = advertencia.ok( "No puedes descargar ese vídeo","Las descargas en RTMP aún no","están soportadas")
         else:
             import traceback,sys
             from pprint import pprint
@@ -714,7 +721,7 @@ def downloadfile(url,nombrefichero,headers=[],silent=False,continuar=False):
 
     if not silent:
         try:
-            progreso.Cerrar()
+            progreso.close()
         except:
             pass
 
@@ -868,7 +875,7 @@ def downloadfileGzipped(url,pathfichero):
                         logger.error( "%s" % line )
             
             # El usuario cancelo la descarga
-            if progreso.IsCanceled():
+            if progreso.iscanceled():
                 logger.info("Descarga del fichero cancelada")
                 f.close()
                 progreso.close()

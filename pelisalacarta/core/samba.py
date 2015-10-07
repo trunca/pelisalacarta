@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 #------------------------------------------------------------
 # pelisalacarta - XBMC Plugin
-# Lista de vídeos favoritos
+# Acceso a directorios con samba
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 #------------------------------------------------------------
 import logger
@@ -64,7 +64,8 @@ def parse_url(url):
     return server_name,share_name,path,user,password
 
 def connect(server_name,user,password):
-    import smb,nmb
+    from lib.samba import smb as smb
+    from lib.samba import nmb as nmb
 
     logger.info("[samba.py] Crea netbios...")
     netbios = nmb.NetBIOS()

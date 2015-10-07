@@ -206,7 +206,7 @@ def downloadpage(url,post=None,headers=None,follow_redirects=True, timeout=None,
         cookies = False
         
     if timeout ==None:
-      timeout=socket.getdefaulttimeout()
+      timeout = 25
         
     logger.info("----------------------------------------------")
     logger.info("[scrapertools.py] - downloadpage")
@@ -264,8 +264,6 @@ def downloadpage(url,post=None,headers=None,follow_redirects=True, timeout=None,
     # Lanza la petición
     # -------------------------------------------------
     logger.debug("Realizando Peticion")
-    urlopen = urllib2.urlopen
-    Request = urllib2.Request
     # Contador
     inicio = time.clock()
     # Diccionario para las cabeceras
@@ -274,16 +272,10 @@ def downloadpage(url,post=None,headers=None,follow_redirects=True, timeout=None,
     # Añade las cabeceras
     for header in headers:
       txheaders[header[0]]=header[1]
-    req = Request(url, post, txheaders)
+    req = urllib2.Request(url, post, txheaders)
     
-    try:
-      if timeout is None:
-        handle=urlopen(req)
-      else:        
-        deftimeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(timeout)
-        handle=urlopen(req)            
-        socket.setdefaulttimeout(deftimeout)
+    try:        
+      handle=urllib2.urlopen(req, timeout=timeout)            
       
       logger.debug("Peticion Realizada")
       if cookies==True:
@@ -314,6 +306,9 @@ def downloadpage(url,post=None,headers=None,follow_redirects=True, timeout=None,
       else:
         logger.error("No se ha podido realizar la petición (Codigo: "+str(e.code) + ")")
       return None
+    except socket.timeout, e:
+        logger.info("Timed Out: la pagina no ha respondido en el tiempo solicitado")
+        return None
     except:
       import traceback
       logger.info(traceback.format_exc())

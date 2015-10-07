@@ -4,7 +4,6 @@
 # Conector para flashx
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 #------------------------------------------------------------
-# Credits:
 
 import urlparse,urllib2,urllib,re
 import os
@@ -12,94 +11,87 @@ import os
 from core import scrapertools
 from core import logger
 from core import config
-
-def test_video_exists( page_url ):
-    return False,"Conector no soportado por pelisalacarta"
+from core import jsunpack
 
 def get_video_url( page_url , premium = False , user="" , password="", video_password="" ):
-    logger.info("[flashx.py] get_video_url(page_url='%s')" % page_url)
+    logger.info("pelisalacarta.servers.flashx url="+page_url)
+
+    # Lo pide una vez
+    headers = [['User-Agent','Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14']]
+    data = scrapertools.cache_page( page_url , headers=headers )
+    #logger.info("data="+data)
+    
+    form_url = scrapertools.get_match(data,"<Form method=\"POST\" action='([^']+)'>")
+    logger.info("pelisalacarta.servers.flashx form_url="+form_url)
+    form_url = urlparse.urljoin(page_url,form_url)
+    logger.info("pelisalacarta.servers.flashx form_url="+form_url)
+
+    op = scrapertools.get_match(data,'<input type="hidden" name="op" value="([^"]+)"')
+    logger.info("pelisalacarta.servers.flashx op="+op)
+    
+    usr_login = ""
+    
+    id = scrapertools.get_match(data,'<input type="hidden" name="id" value="([^"]+)"')
+    logger.info("pelisalacarta.servers.flashx id="+id)
+
+    fname = scrapertools.get_match(data,'<input type="hidden" name="fname" value="([^"]+)"')
+    logger.info("pelisalacarta.servers.flashx fname="+fname)
+    
+    referer = scrapertools.get_match(data,'<input type="hidden" name="referer" value="([^"]*)"')
+    logger.info("pelisalacarta.servers.flashx referer="+referer)
+    
+    hashstring = scrapertools.get_match(data,'<input type="hidden" name="hash" value="([^"]*)"')
+    logger.info("pelisalacarta.servers.flashx hashstring="+hashstring)
+    
+    imhuman = scrapertools.get_match(data,'<input type="submit".*?name="imhuman" value="([^"]+)"').replace(" ","+")
+    logger.info("pelisalacarta.servers.flashx imhuman="+imhuman)
+        
+    import time
+    time.sleep(10)
+
+    # Lo pide una segunda vez, como si hubieras hecho click en el banner
+    #op=download1&usr_login=&id=z3nnqbspjyne&fname=Coriolanus_DVDrip_Castellano_by_ARKONADA.avi&referer=&hash=nmnt74bh4dihf4zzkxfmw3ztykyfxb24&imhuman=Continue+to+Video
+    #op=download1&usr_login=&id=h6gjvhiuqfsq&fname=GENES1S.avi&referer=&hash=taee4nbdgbuwuxfguju3t6nq2gkdzs6k&imhuman=Proceed+to+video
+    #op=download1&usr_login=&id=vpkvjdpkh972&fname=G4ngm4n15HDRSub.avi&referer=&hash=1357853-176-86-1437560090-ee4170e4a4eca471524f6f07eca2b7a9&imhuman=Proceed+to+video
+    post = "op="+op+"&usr_login="+usr_login+"&id="+id+"&fname="+fname+"&referer="+referer+"&hash="+hashstring+"&imhuman="+imhuman
+    headers.append(["Referer",page_url])
+    body = scrapertools.cache_page( form_url , post=post, headers=headers )
+    logger.info("body="+body)
+
+    data = scrapertools.find_single_match(body,"<script type='text/javascript'>(eval\(function\(p,a,c,k,e,d.*?)</script>")
+    logger.info("data="+data)
+    data = jsunpack.unpack(data)
+    logger.info("data="+data)
+
+    # Extrae la URL
+    #{file:"http://f11-play.flashx.tv/luq4gfc7gxixexzw6v4lhz4xqslgqmqku7gxjf4bk43u4qvwzsadrjsozxoa/video1.mp4"}
     video_urls = []
-
-    # http://play.flashx.tv/player/embed.php?hash=4KB84GO238XX&width=600&height=370&autoplay=no
-    data = scrapertools.cache_page(page_url)
-    logger.info("data="+data)
-    logger.info("        ")
-    logger.info("----------------------------------------------------------------------")
-    logger.info("        ")
-
-    '''
-    <form method="POST" action="playfx.php" />
-      <input name="yes" type="hidden" value="m8fr27GmfHRrmr/CpqVpiouM79zY5plvaZaomdzXmpmb2rWmq6JXpZjJ4NTn2m5il8jb2NWiYpeZyKqo2aRimGzM2qPXp2pol5ewqq2jlliU2+zi5N6Sq3Df3eaa56SXpc/osKurX2NnmqanqaBiaGeM59/Y5pqfmKOppqylY2Vql6qk">
-      <input name="sec" type="hidden" value="Z7G6q6i5gGRmntDL">
-      <a href="" onclick="document.forms[0].submit();popup('http://free-stream.tv/','adsf','810','450','yes');return false;" class="auto-style3"><strong><font color="red">PLAY NOW (CLICK HERE)</font></strong></a></span><br />
-    </form>
-    '''
-    bloque = scrapertools.get_match(data,'<form method="POST" action="playfx.php"(.*?)</form>')
-    logger.info("bloque="+bloque)
-    yes = scrapertools.get_match(data,'<input name="yes" type="hidden" value="([^"]+)">')
-    sec = scrapertools.get_match(data,'<input name="sec" type="hidden" value="([^"]+)">')
-
-    # POST http://play.flashx.tv/player/playfx.php
-    # yes=m8fr27GmfHRrmr%2FCpqVpiouM79zY5plvaZaomdzXmpmb2rWmq6JXpZjJ4NTn2m5il8jb2NWiYpeZyKqo2aRimGzM2qPXp2pol5ewqq2jlliU2%2Bzi5N6Sq3Df3eaa56SXpc%2FosKurX2NnmqanqaBiaGeM59%2FY5pqfmKOppqylY2Vql6qk&sec=Z7G6q6i5gGRmntDL
-    post = urllib.urlencode( {"yes":yes,"sec":sec})
-    url = "http://play.flashx.tv/player/playfx.php"
-    data = scrapertools.cache_page(url,post=post)
-    logger.info("data="+data)
-    logger.info("        ")
-    logger.info("----------------------------------------------------------------------")
-    logger.info("        ")
-
-    '''
-    <object id="nuevoplayer" width="'+ww+'" height="'+hh+'" data="http://embed.flashx.tv/nuevo/player/fxplay.swf?config=http://play.flashx.tv/nuevo/player/play.php?str=4MfrzrWaw6iwmr.1qpmwvtA=" type="application/x-shockwave-flash"
-    '''
-    url = scrapertools.get_match(data,'(http://play.flashx.tv/nuevo/player/play.php\?str=[^"]+)"')
-    data = scrapertools.cache_page(url,post=post)
-    logger.info("data="+data)
-    logger.info("        ")
-    logger.info("----------------------------------------------------------------------")
-    logger.info("        ")
-
-    #http://play.flashx.tv/nuevo/player/play.php?str=4MfrzrWaw6iwmr.1qpmwvtA=
-    #<file>http://fx021.flashx.tv:8080/video/2012/12/16---xYUbI3bSDzihXs9IP6eNRw---1383258808---1355698331547fb.flv</file>
-
-    media_url = scrapertools.get_match(data,"<file>([^<]+)</file>")
-    video_urls.append( [ scrapertools.get_filename_from_url(media_url)[-4:]+" [flashx]",media_url])
+    media_urls = scrapertools.find_multiple_matches(data,'\{file\:"([^"]+)"\}')
+    video_urls = []
+    for media_url in media_urls:
+        video_urls.append( [ scrapertools.get_filename_from_url(media_url)[-4:]+" [flashx]",media_url])
 
     for video_url in video_urls:
-        logger.info("[flashx.py] %s - %s" % (video_url[0],video_url[1]))
+        logger.info("pelisalacarta.servers.flashx %s - %s" % (video_url[0],video_url[1]))
 
     return video_urls
 
 # Encuentra vídeos del servidor en el texto pasado
 def find_videos(data):
+
+    # Añade manualmente algunos erróneos para evitarlos
     encontrados = set()
     devuelve = []
 
-    #http://flashx.tv/video/4KB84GO238XX/themakingofalady720phdtvx264-bia
-    #http://play.flashx.tv/player/embed.php?hash=NGHKGW2OA1Y9&width=620&height=400
-    data = urllib.unquote(data)
-    
-    patronvideos  = 'play.flashx.tv/player/embed.php[^h]+hash=([A-Z0-9]+)'
-    logger.info("[flashx.py] find_videos #"+patronvideos+"#")
+    #http://www.flashx.tv/li5ydvxhg514.html
+    #http://flashx.tv/z3nnqbspjyne
+    patronvideos  = 'flashx.tv/([a-z0-9A-Z]+)'
+    logger.info("pelisalacarta.servers.flashx find_videos #"+patronvideos+"#")
     matches = re.compile(patronvideos,re.DOTALL).findall(data)
 
     for match in matches:
         titulo = "[flashx]"
-        url = "http://play.flashx.tv/player/embed.php?hash="+match+"&width=600&height=370&autoplay=no"
-        if url not in encontrados:
-            logger.info("  url="+url)
-            devuelve.append( [ titulo , url , 'flashx' ] )
-            encontrados.add(url)
-        else:
-            logger.info("  url duplicada="+url)
-
-    patronvideos  = 'flashx.tv/video/([A-Z0-9]+)/[a-z0-9\-]+'
-    logger.info("[flashx.py] find_videos #"+patronvideos+"#")
-    matches = re.compile(patronvideos,re.DOTALL).findall(data)
-
-    for match in matches:
-        titulo = "[flashx]"
-        url = "http://play.flashx.tv/player/embed.php?hash="+match+"&width=600&height=370&autoplay=no"
+        url = "http://www.flashx.tv/"+match+".html"
         if url not in encontrados:
             logger.info("  url="+url)
             devuelve.append( [ titulo , url , 'flashx' ] )
@@ -110,6 +102,7 @@ def find_videos(data):
     return devuelve
 
 def test():
-    video_urls = get_video_url("http://play.flashx.tv/player/embed.php?hash=4KB84GO238XX&width=600&height=370&autoplay=no")
+
+    video_urls = get_video_url("http://www.flashx.tv/vpkvjdpkh972.html")
 
     return len(video_urls)>0

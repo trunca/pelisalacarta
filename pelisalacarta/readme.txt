@@ -188,10 +188,9 @@ And finally thanks to Shaddow for giving us the first decryption routines of the
 
 Icons come from varios sources:
 
-- Some channel icons are mine, captured and edited using Gimp, of made by channel authors.
-- Some other channel icons are from @narfss
-- Some icons are from Crystal Clear Collection
-- Most of the banner icons came from @Wolfk
+- Main pelisalacarta sections are from "Flat icons inspired by Google" (pixeden.com)
+- Categories icons are from BigMug 220 Line icons (https://dribbble.com/shots/1563947-Free-Icon-Set)
+
 
 And finally thanks to all my blog readers, who give me lot of ideas and support.
 

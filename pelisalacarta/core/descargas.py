@@ -65,9 +65,9 @@ def mainlist(item):
           title = scrapertools.find_single_match(lines,'<title>\((.*?)\)</title>')
           thumbnail = scrapertools.find_single_match(lines,'<thumb>(.*?)</thumb>')
           plot = scrapertools.find_single_match(lines,'<plot>(.*?)</plot>')
-          itemlist.append( Item(channel="descargas", action="play", title=title, url=url, thumbnail=thumbnail, plot=plot, server="local", folder=False))
+          itemlist.append( Item(channel="descargas", action="play", title=title,  url=url, thumbnail=thumbnail, plot=plot, server="local", folder=False))
         else:
-          itemlist.append( Item(channel="descargas", action="play", title=fichero, url=url, server="local", folder=False))
+          itemlist.append( Item(channel="descargas", action="play", title=fichero, context="Eliminar Archivo,BorrarDescarga", url=url, server="local", folder=False))
 
     return itemlist
 
@@ -140,7 +140,7 @@ def pendientes(item):
       item = LeerDescarga(fichero,DOWNLOAD_LIST_PATH)
       itemlist.append(item)
       
-    itemlist.append( Item( channel=CHANNELNAME , action="downloadall" , title="(Empezar la descarga de la lista)", thumbnail=os.path.join(IMAGES_PATH, "Crystal_Clear_action_db_update.png") , folder=False ))
+    itemlist.append( Item( channel=CHANNELNAME , action="downloadall" , title="(Empezar la descarga de la lista)", thumbnail="%s/thumb_nofolder.png" , folder=False ))
     return itemlist
 
 def errores(item):
@@ -313,13 +313,15 @@ def GuardarDescarga(item, Ruta=DOWNLOAD_LIST_PATH):
 def BorrarDescarga(item,Ruta=DOWNLOAD_LIST_PATH):
     logger.info("[descargas.py] BorrarDescarga")
     if not usingsamba(Ruta):
-        os.remove(item.file)
+        os.remove(item.url)
     else:
-        fullfilename = item.file.replace("\\","/")
+        fullfilename = item.url.replace("\\","/")
         partes = fullfilename.split("/")
         filename = partes[len(partes)-1]
         samba.remove_file(filename,Ruta)
-        
+    import guitools
+    guitools.Refresh()
+    
 def delete_error_bookmark(item):
     BorrarDescarga(item,ERROR_PATH)
 

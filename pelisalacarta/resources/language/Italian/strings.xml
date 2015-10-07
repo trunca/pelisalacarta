@@ -120,6 +120,7 @@
     <string id="30117">Vuoi refiner la ricerca utilizzando la tastiera?</string> <!-- ¿Quieres refinar la búsqueda con el teclado? -->
     <string id="30135">Aggiunto alla libreria</string>
 
+    <string id="30130">Nuovo</string>
     <string id="30118">Canali</string>
     <string id="30119">Scegli una categoria</string>
     <string id="30120">Scegli una lingua</string>
@@ -129,12 +130,11 @@
     <string id="30124">Anime</string>
     <string id="30125">Documentari</string>
     <string id="30136">Versioni originali</string>
-    <string id="30126">Musica</string>
-    <string id="30127">Servers</string>
+    <string id="30126">Adulti</string>
+    <string id="30127">Latino</string>
     <string id="30128">Cerca trailer</string>
-    <string id="30129">Nazionali</string>
-    <string id="30130">Autonomia</string>
-    <string id="30131">Locali</string>
+    <string id="30129">Adulto</string>
+    <string id="30131">Libreria</string>
     <string id="30132">Tema</string>
     <string id="30133">Internet</string>
     <string id="30134">Nuovi</string>

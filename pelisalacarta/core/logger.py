@@ -1,43 +1,46 @@
 # -*- coding: utf-8 -*-
 #------------------------------------------------------------
-# Logger multiplataforma
-#------------------------------------------------------------
 # pelisalacarta
+# logger for mediaserver
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 #------------------------------------------------------------
-# Creado por: Jesús (tvalacarta@gmail.com)
-# Licencia: GPL (http://www.gnu.org/licenses/gpl-3.0.html)
-#------------------------------------------------------------
-# Historial de cambios:
-#------------------------------------------------------------
-
-import platform_name
 import os
+import logging.config
+import logging
 import config
 
-if os.path.exists(os.path.join( config.get_runtime_path(),"platformcode",platform_name.PLATFORM_NAME,"logger.py")):
-  exec "import platformcode."+platform_name.PLATFORM_NAME+".logger as platformlogger"
-  default = False
-else:
-  default = True
+class ExtendedLogger(logging.Logger):
+    def findCaller(self):
+        f = logging.currentframe().f_back.f_back
+        rv = "(unknown file)", 0, "(unknown function)"
+        while hasattr(f, "f_code"):
+            co = f.f_code
+            filename = os.path.normcase(co.co_filename)
+            if "logger" in filename: # This line is modified.
+                f = f.f_back
+                continue
+            rv = (filename, f.f_lineno, co.co_name)
+            break
+        return rv
+        
+logging.setLoggerClass(ExtendedLogger)        
+logging.basicConfig(level=logging.DEBUG,
+format='%(levelname)-5s %(asctime)s %(filename)-20s %(message)s',
+datefmt="%d/%m/%y-%H:%M:%S",
+filename=os.path.join(config.get_data_path(),"pelisalacarta.log"),
+filemode='w')
+logger_object=logging.getLogger("mediaserver")
+
 
 def info(texto):
-    if config.get_setting("debug")=="true":
-        if not default:
-            platformlogger.info(texto)
-        else:
-            print texto
+  if config.get_setting("debug")=="true":
+      logger_object.info(unicode(str(texto),"utf-8","ignore").replace("\n","\n"+ " "*45))
 
 def debug(texto):
-    if config.get_setting("debug")=="true":
-        if not default:
-            platformlogger.debug(texto)
-        else:
-            print texto
+  if config.get_setting("debug")=="true":
+      logger_object.debug(unicode(str(texto),"utf-8","ignore").replace("\n","\n"+ " "*45))
 
 def error(texto):
+    logger_object.error(unicode(str(texto),"utf-8","ignore").replace("\n","\n"+ " "*45))
 
-        if not default:
-            platformlogger.error(texto)
-        else:
-            print texto
+

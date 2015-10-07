@@ -72,7 +72,7 @@ class Item(object):
       import math
       Segundos=0
       
-      #Si el valor recibido es un Strign, extrae los Segundos, Minutos y Horas y lo pasa a Segundos.
+      #Si el valor recibido es un String, extrae los Segundos, Minutos y Horas y lo pasa a Segundos.
       #Formatos válidos: H:M:S, M:S, S
       if type(string)==str:
         Segundos = 0
@@ -93,11 +93,11 @@ class Item(object):
     #Devuelve el ítem en un string con todos los campos, para ver en el log
     def tostring(self):
       devuelve=""
-      for property, value in vars(self).iteritems():
+      for property, value in sorted(vars(self).iteritems()):
         if not devuelve:
           devuelve = property + "=["+str(value)+"]"
         else:
-          devuelve = devuelve + " ," + property + "=["+str(value)+"]"
+          devuelve = devuelve + ", " + property + "=["+str(value)+"]"
 
       return devuelve
     
@@ -112,6 +112,25 @@ class Item(object):
           devuelve = devuelve + base64.b64encode(property + "=" + str(value)) + separator
         return urllib.quote_plus(base64.b64encode(devuelve))
         
+    def tojson(self):
+        import json
+        devuelve = {}
+        for property, value in vars(self).iteritems():
+          devuelve[property] = value
+        return json.dumps(devuelve, indent=4, sort_keys=True)
+
+    def fromjson(self,cadena): 
+        import json
+        JSONItem = json.loads(cadena)
+        for key in JSONItem:
+          if type(JSONItem[key]) == unicode:
+            value = JSONItem[key].encode("utf8")
+          else:
+            value = JSONItem[key]
+          
+          exec "self."+key+" = type(self."+key+")(value)"
+
+
     #Deserializa todas las propiedades.
     def deserialize(self,cadena): 
         separator = "|"
