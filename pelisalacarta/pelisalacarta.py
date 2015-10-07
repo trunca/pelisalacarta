@@ -141,6 +141,7 @@ def MostrarInfo():
 
 def start():
   logger.info("pelisalacarta server init...")
+  import services
   config.verify_directories_created() 
   try: 
       import HTTPServer

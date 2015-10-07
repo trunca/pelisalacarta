@@ -29,12 +29,9 @@
         <replaceregexp file="pelisalacarta/version.xml" match="&lt;changes&gt;(.*?)&lt;/changes&gt;" replace="&lt;changes&gt;${versionchanges}&lt;/changes&gt;"/>
         <mkdir dir="${target}/tmp"/>
         
-        <antcall target="copy-applications"/>
-        <zip destfile="${target}/applications.zip" basedir="${target}/tmp"/>
-        
+        <antcall target="copy-applications"/>       
         <antcall target="copy-mediaserver"/>
-        <zip destfile="${target}/pelisalacarta-mediaserver-${version}${build}.zip" basedir="${target}/tmp"/>
-        <copy file="${target}/pelisalacarta-mediaserver-${version}${build}.zip" tofile="${target}/pelisalacarta-mediaserver.zip"/>
+        <zip destfile="${target}/pelisalacarta-mediaserver.zip" basedir="${target}/tmp"/>
         <delete dir="${target}/tmp/pelisalacarta"/>
 
         <delete dir="${target}/tmp"/>
@@ -46,12 +43,9 @@
         <property-exp name="build" value="${build} + 1" />
         <mkdir dir="${target}/tmp"/>
         
-        <antcall target="copy-applications"/>
-        <zip destfile="${target}/applications.zip" basedir="${target}/tmp"/>
-        
+        <antcall target="copy-applications"/>       
         <antcall target="copy-mediaserver"/>
-        <zip destfile="${target}/pelisalacarta-mediaserver-${version}${build}.zip" basedir="${target}/tmp"/>
-        <copy file="${target}/pelisalacarta-mediaserver-${version}${build}.zip" tofile="${target}/pelisalacarta-mediaserver.zip"/>
+        <zip destfile="${target}/pelisalacarta-mediaserver.zip" basedir="${target}/tmp"/>
         <delete dir="${target}/tmp/pelisalacarta"/>
       
         <delete dir="${target}/tmp"/>
@@ -71,9 +65,9 @@
               <exclude name="**/*.pyc"/>
             </fileset>
         </copy>
-        <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/mediaserver/settings.xml" match='&lt;setting default="(.*?)" id="server.port" label="Puerto HTTP" type="text"/&gt;' replace='&lt;setting default="8888" id="server.port" label="Puerto HTTP" type="text"/&gt;'/>
-        <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/mediaserver/settings.xml" match='&lt;setting default="(.*?)" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;' replace='&lt;setting default="8889" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;'/>
-        <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/mediaserver/config.py" match='\.pelisalacarta' replace='pelisalacarta'/>
+        <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/settings.xml" match='&lt;setting default="(.*?)" id="server.port" label="Puerto HTTP" type="text"/&gt;' replace='&lt;setting default="8888" id="server.port" label="Puerto HTTP" type="text"/&gt;'/>
+        <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/settings.xml" match='&lt;setting default="(.*?)" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;' replace='&lt;setting default="8889" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;'/>
+        <replaceregexp file="${target}/tmp/pelisalacarta/platformcode/config.py" match='\.pelisalacarta' replace='pelisalacarta'/>
         <replaceregexp file="${target}/tmp/pelisalacarta/pelisalacarta.py" match="if 1" replace="if 0" flags="g" byline="true"/>
 
     </target>

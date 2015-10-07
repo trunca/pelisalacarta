@@ -1300,7 +1300,7 @@ function GetResponses(data) {
 }
 function ImgError(obj){
   if (obj.src.indexOf("http://") == 0){
-  e
+  
   if (obj.src.indexOf(obj.alt) !== 0){
     obj.src=obj.alt+"/image-"+encodeURIComponent(btoa(obj.src))
   }else{obj.style.display="none";obj.parentNode.children[1].style.display="inline-block"}

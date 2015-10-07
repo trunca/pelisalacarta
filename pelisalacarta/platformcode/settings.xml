@@ -7,7 +7,7 @@
     <setting default="true" id="updatecheck2" label="Comprobar actualizaciones" type="bool"/>
     <setting default="true" id="updatechannels" label="Actualizar servidores Automaticamente" type="bool"/>
     <setting default="true" id="debug" label="Depuracion" type="bool"/>
-    <setting default="0" id="debuglevel" label="Nivel de Log" lvalues="Error|Debug|Todo" type="enum" values="0|1|2"/>
+    <setting id="debuglevel" type="enum" values="Nada|Error|Debug|Info" label="Nivel de Log" default="1"/>
     <setting default="false" id="updatelibrary" label="Actualizar Biblioteca al iniciar" type="bool"/>
     <setting default="0" id="default_action" label="Accion por defecto" lvalues="Preguntar|Ver|Ver en calidad alta|Enviar a Jdownloader" type="enum" values="0|1|2|3"/>
     <setting default="0" id="cache.mode" label="Modo Cache" lvalues="Automatico|Cachear todo|No chachear nada" type="enum" values="0|1|2"/>
