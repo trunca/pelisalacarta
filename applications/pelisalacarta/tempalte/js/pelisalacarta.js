@@ -884,6 +884,7 @@ function GetResponses(data) {
               }else{
                 Action = 'DescargarContenido(\''+ JsonItem["Url"] +'\')'
               }
+              if (JsonItem["Thumbnail"].indexOf("/") == 0){JsonItem["Thumbnail"] = JsonItem["Host"] +"/local-"+encodeURIComponent(btoa(JsonItem["Thumbnail"]))}
               if (JsonItem["Mode"]==0){
                 HtmlItem ='<li class="ListItemBanner"><a onblur="" onfocus="ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgLocal(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem"></p></a>{$BotonMenu}</li>'
               }else if (JsonItem["Mode"]==1){

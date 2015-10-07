@@ -943,16 +943,17 @@ function GetResponses(data) {
               }else{
                 Action = 'DescargarContenido(\''+ JsonItem["Url"] +'\')'
               }
+              if (JsonItem["Thumbnail"].indexOf("/") == 0){JsonItem["Thumbnail"] = JsonItem["Host"] +"/local-"+encodeURIComponent(btoa(JsonItem["Thumbnail"]))}
               if (JsonItem["Mode"]==0){
-                HtmlItem ='<li class="ListItemBanner"><a onblur="" onfocus="ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgLocal(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem"></p></a>{$BotonMenu}</li>'
+                HtmlItem ='<li class="ListItemBanner"><a onblur="" onfocus="ItemFocus=this" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgLocal(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem"></p></a>{$BotonMenu}</li>'
               }else if (JsonItem["Mode"]==1){
-                HtmlItem ='<li class="ListItemChannels"><a onblur="DesCargarInfo(this)" onfocus="ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><h3 class="ListItem">' + JsonItem["Title"] + '</h3><div class="ListItem"><img class="ListItem" onerror="ImgLocal(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"></div></a>{$BotonMenu}</li>'
+                HtmlItem ='<li class="ListItemChannels"><a onblur="DesCargarInfo(this)" onfocus="ItemFocus=this" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><h3 class="ListItem">' + JsonItem["Title"] + '</h3><div class="ListItem"><img class="ListItem" onerror="ImgLocal(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"></div></a>{$BotonMenu}</li>'
              
               }else if (JsonItem["Mode"]==2){
                 if (JsonItem["ItemAction"]=="go_back" || JsonItem["ItemAction"]=="search" || JsonItem["Thumbnail"].indexOf("thumb_folder") != -1 || JsonItem["Thumbnail"].indexOf("thumb_nofolder") != -1 || JsonItem["Thumbnail"].indexOf("thumb_error") != -1){
-                  HtmlItem ='<li class="ListItem"><a onfocus="DesCargarInfo(this);ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem">' + JsonItem["Plot"] + '</p></a>{$BotonMenu}</li>'
+                  HtmlItem ='<li class="ListItem"><a onfocus="DesCargarInfo(this);ItemFocus=this" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem">' + JsonItem["Plot"] + '</p></a>{$BotonMenu}</li>'
                 }else{
-                  HtmlItem ='<li class="ListItem"><a onblur="DesCargarInfo(this)" onfocus="CargarInfo(this);ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem">' + JsonItem["Plot"] + '</p></a>{$BotonMenu}</li>'
+                  HtmlItem ='<li class="ListItem"><a onblur="DesCargarInfo(this)" onfocus="CargarInfo(this);ItemFocus=this" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem">' + JsonItem["Plot"] + '</p></a>{$BotonMenu}</li>'
                 }
               }
               Lista = "";
@@ -961,7 +962,7 @@ function GetResponses(data) {
                 '<li class="Lista"><a href="javascript:void(0)" onclick="CerrarDialogos();DescargarContenido(\'' + JsonItem["ContextMenu"]["Url" + x] +
                 '\')" class="Lista"><h3>' + JsonItem["ContextMenu"]["Title" + x] + '</h3></a></li>';
               }
-              BotonMenu = '<a class="ListItemButton" href="javascript:void(0)" onmouseover="this.focus()" onclick=\'ItemFocus=this;AbrirMenu("Menu","'+btoa(Lista)+'")\'></a>';
+              BotonMenu = '<a class="ListItemButton" href="javascript:void(0)" onclick=\'ItemFocus=this;AbrirMenu("Menu","'+btoa(Lista)+'")\'></a>';
               ClassMenu = "ListItemMenu"
               if (JsonItem["ContextMenu"]["Count"] === 0) {
                   BotonMenu = "";
@@ -1299,7 +1300,7 @@ function GetResponses(data) {
 }
 function ImgError(obj){
   if (obj.src.indexOf("http://") == 0){
-  
+  e
   if (obj.src.indexOf(obj.alt) !== 0){
     obj.src=obj.alt+"/image-"+encodeURIComponent(btoa(obj.src))
   }else{obj.style.display="none";obj.parentNode.children[1].style.display="inline-block"}
