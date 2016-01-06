@@ -1,0 +1,19 @@
+{"version", "0.7.0"}.
+{"name", "Pelisalacarta"}.
+{"id", "pelisalacarta"}.
+{"description", "Pelisalacarta para Blusens"}.
+{"description_i18n", [
+	{"en", "Access to all Pelisalacarta contents."},
+	{"es", "Accede a todos los contenidos disponibles en el plugin Pelisalacarta de XBMC."}
+]}.
+{"icon", "icon.png"}.
+{"type","default"}.
+{"position", "applications"}.
+{"init_url", "html/page.html"}.
+{"window_xpos", 30}.
+{"window_ypos", 20}.
+{"window_width", 1220}.
+{"window_height", 680}.
+
+
+
