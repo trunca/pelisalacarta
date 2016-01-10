@@ -2,7 +2,7 @@
 # ------------------------------------------------------------
 # pelisalacarta - XBMC Plugin
 # platformtools
-# Herramienta para trabajar con la plataforma, Version KODI
+# Herramienta para trabajar con la plataforma, Version HTML
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 # ------------------------------------------------------------
 '''
@@ -87,7 +87,6 @@ Video:
 
 import os
 import sys
-
 import xbmc
 import xbmcgui
 import xbmcplugin

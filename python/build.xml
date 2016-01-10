@@ -27,17 +27,13 @@
 -->
 <project name="pelisalacarta" default="package">
 	<description>pelisalacarta</description>
-
-    <property name="oldversion" value="4.0.4"/>
-    <property name="oldversionboxee" value="10.16"/>
-    <property name="oldversiondate" value="19/03/2015"/>
-
-    <property name="version" value="4.0.5"/>
-    <property name="versionboxee" value="10.17"/>
-    <property name="versiondate" value="20/12/2015"/>
+    <property name="version" value="4.0.3"/>
+    <property name="versionboxee" value="4.0.3"/>
+    <property name="versiondate" value="28/08/2015"/>
     <property name="versionchanges" value="Versión semanal"/>
 
-    <property name="target" value="../../target/python"/>
+    <property name="target" value="../bin"/>
+    <property name="test" value="../../tests"/>
     <property file='${user.home}/build.properties'/>
 
 	<!-- init ===================================================================== -->
@@ -56,7 +52,8 @@
 
     <!-- package =============================================== -->
     <target name="package" depends="clean" description="Builds a package for each platform">
-
+        <antcall target="copy-mediaserver"/>
+        <antcall target="copy-mediaserver-blusens"/>
         <antcall target="copy-kodi-15-isengard"/>
         <antcall target="copy-kodi-15-isengard-ui"/>
         <antcall target="copy-kodi-14-helix"/>
@@ -67,356 +64,408 @@
         <antcall target="copy-xbmc-09-plugin"/>
         <antcall target="copy-boxee"/>
         <antcall target="copy-plex"/>
+        <copy file="main-classic/version.xml" tofile="${target}/version.xml"/>
 
-        <!--
-        <mkdir dir="${target}/mediaserver/pelisalacarta"/>
-        <antcall target="copy-mediaserver"/>
-        <zip destfile="${target}/mediaserver/pelisalacarta-mediaserver-${version}.zip" basedir="${target}/mediaserver"/>
-
-        <mkdir dir="${target}/dreambox/pelisalacarta"/>
-        <antcall target="copy-dreambox"/>
-        <zip destfile="${target}/dreambox/pelisalacarta-dreambox-${version}.zip" basedir="${target}/dreambox"/>
-        -->
     </target>
-    
-    <!-- upload =============================================== -->
-    <target name="upload" description="Upload zip files to the web server">
-
-        <echo message="Subiendo pelisalacarta-kodi-15-isengard-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/kodi-15-isengard/pelisalacarta-kodi-isengard-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-kodi-15-isengard-ui-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/kodi-15-isengard-ui/pelisalacarta-ui-kodi-isengard-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-kodi-14-helix-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/kodi-14-helix/pelisalacarta-kodi-helix-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-xbmc-13-gotham-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/xbmc-13-gotham/pelisalacarta-xbmc-gotham-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-xbmc-12-frodo-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/xbmc-12-frodo/pelisalacarta-xbmc-frodo-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-xbmc-11-eden-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/xbmc-11-eden/pelisalacarta-xbmc-eden-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-xbmc-10-dharma-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/xbmc-10-dharma/pelisalacarta-xbmc-dharma-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-xbmc-09-plugin-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/xbmc-09-plugin/pelisalacarta-xbmc-plugin-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-boxee-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/boxee/pelisalacarta-boxee-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-plex-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/plex/pelisalacarta-plex-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <!--
-        <echo message="Subiendo pelisalacarta-wiimc-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/wiimc/pelisalacarta-wiimc-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-rss-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/rss/pelisalacarta-rss-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-
-        <echo message="Subiendo pelisalacarta-mediaserver-${version}.zip"/>
-        <exec executable="scp">
-            <arg value="${target}/mediaserver/pelisalacarta-mediaserver-${version}.zip"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-        -->
+    <target name="test-mediaserver">
+        <delete dir="${test}/mediaserver"/>
+        <mkdir dir="${test}/mediaserver/pelisalacarta"/>
+        <copy todir="${test}/mediaserver/pelisalacarta">
+            <fileset dir="main-classic">
+              <exclude name="**/.*"/>
+              <exclude name="**/.*/**"/>
+              <exclude name="**/*.pyo"/>
+              <exclude name="**/*.pyc"/>
+              <exclude name="resources/*.*"/>
+              <exclude name="resources/skins/**"/>
+              <exclude name="resources/images/posters/**"/>
+              <exclude name="resources/images/servers/**"/>
+              <exclude name="resources/images/fanart/**"/>
+              <exclude name="resources/images/banners/**"/>
+              <exclude name="resources/images/bannermenu/**"/>
+              <exclude name="resources/images/squares/**"/>
+              <exclude name="default.py"/>
+              <exclude name="icon.png"/>
+              <exclude name="fanart.jpg"/>
+              <exclude name="addon.xml"/>
+            </fileset>
+        </copy>
+        <copy todir="${test}/mediaserver/pelisalacarta" overwrite="true">
+            <fileset dir="version-html">
+                  <exclude name="**/.*"/>
+                  <exclude name="**/.*/**"/>
+            </fileset>
+        </copy>
     </target>
+    <target name="test-mediaserver-blusens">
+        <delete dir="${test}/blusens"/>
+        <mkdir dir="${test}/blusens/pelisalacarta"/>
+        <copy todir="${test}/blusens/pelisalacarta">
+            <fileset dir="main-classic">
+              <exclude name="**/.*"/>
+              <exclude name="**/.*/**"/>
+              <exclude name="**/*.pyo"/>
+              <exclude name="**/*.pyc"/>
+              <exclude name="resources/*.*"/>
+              <exclude name="resources/skins/**"/>
+              <exclude name="resources/images/posters/**"/>
+              <exclude name="resources/images/servers/**"/>
+              <exclude name="resources/images/fanart/**"/>
+              <exclude name="resources/images/banners/**"/>
+              <exclude name="resources/images/bannermenu/**"/>
+              <exclude name="resources/images/squares/**"/>
+              <exclude name="default.py"/>
+              <exclude name="icon.png"/>
+              <exclude name="fanart.jpg"/>
+              <exclude name="addon.xml"/>
+            </fileset>
+            <fileset dir="version-html">
+                  <exclude name="**/.*"/>
+                  <exclude name="**/.*/**"/>
+            </fileset>
+        </copy>
+        <replaceregexp file="${test}/blusens/pelisalacarta/platformcode/settings.xml" match='&lt;setting default="(.*?)" id="server.port" label="Puerto HTTP" type="text"/&gt;' replace='&lt;setting default="8888" id="server.port" label="Puerto HTTP" type="text"/&gt;'/>
+        <replaceregexp file="${test}/blusens/pelisalacarta/platformcode/settings.xml" match='&lt;setting default="(.*?)" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;' replace='&lt;setting default="8889" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;'/>
+        <replaceregexp file="${test}/blusens/pelisalacarta/core/config.py" match='def get_system_platform\(\)\:(.*?)return "mediaserver"' replace='def get_system_platform():\1return "blusens"' flags="gis" byline="false"/>
 
-    <!-- publish =============================================== -->
-	<target name="publish" description="Notify the repositories that a new version is available">
-        <!--echo message="Actualizando el repositorio de Boxee"/>
-        <ftp server="${tvalacarta.ftp}" remotedir="${boxee.path}/download" userid="${tvalacarta.login}" password="${tvalacarta.password}">
-            <fileset dir="${target}/boxee">
-				<include name="info.mimediacenter.pelisalacarta-${versionboxee}.zip"/>
+        <mkdir dir="${test}/blusens/applications"/>
+        <copy todir="${test}/blusens/applications">
+            <fileset dir="../applications">
+                  <exclude name="**/.*"/>
+                  <exclude name="**/.*/**"/>
+                  <exclude name="/pelisalacarta/template/**"/>
             </fileset>
-            <fileset dir="platformcode/boxee">
-				<include name="info.mimediacenter.pelisalacarta-${versionboxee}.zip.xml"/>
-            </fileset>
-        </ftp>
-        <ftp server="${tvalacarta.ftp}" remotedir="${boxee.path}" userid="${tvalacarta.login}" password="${tvalacarta.password}">
-            <fileset dir="platformcode/boxee">
-				<include name="index.xml"/>
-            </fileset>
-        </ftp-->
-
-        <echo message="Actualizando pelisalacarta-version.xml"/>
-        <copy file="version.xml" tofile="pelisalacarta-version.xml"/>
-        <exec executable="scp">
-            <arg value="pelisalacarta-version.xml"/>
-            <arg value="${ruta_remota_descargas}"/>
-        </exec>
-        <delete file="pelisalacarta-version.xml"/>
+        </copy>
     </target>
-
-    <!-- copy-kodi-15-isengard ============================================================ -->
-    <target name="copy-kodi-15-isengard">
-
-        <mkdir dir="${target}/kodi-15-isengard/plugin.video.pelisalacarta"/>
-
-        <copy todir="${target}/kodi-15-isengard/plugin.video.pelisalacarta">
+    <target name="test-kodi-15-isengard">
+        <delete dir="C:\Users\David\AppData\Roaming\Kodi\addons\plugin.video.pelisalacarta"/>
+        <mkdir dir="C:\Users\David\AppData\Roaming\Kodi\addons\plugin.video.pelisalacarta"/>
+        <copy todir="C:\Users\David\AppData\Roaming\Kodi\addons\plugin.video.pelisalacarta">
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
+                <exclude name="resources/images/bannermenu/**"/>
+                <exclude name="resources/images/banners/**"/>
+                <exclude name="resources/images/fanart/**"/>
+                <exclude name="resources/images/posters/**"/>
+                <exclude name="resources/images/squares/**"/>
+             </fileset>
+        </copy>
+    </target>
+    <target name="test-kodi-15-isengard-ui">
+        <delete dir="C:\Users\David\AppData\Roaming\Kodi\addons\plugin.video.pelisalacarta-ui"/>
+        <mkdir dir="C:\Users\David\AppData\Roaming\Kodi\addons\plugin.video.pelisalacarta-ui"/>
+        <copy todir="C:\Users\David\AppData\Roaming\Kodi\addons\plugin.video.pelisalacarta-ui">
+            <fileset dir="main-classic">
+                <exclude name="**/.*"/>
+                <exclude name="**/.*/**"/>
+                <exclude name="**/*.pyo"/>
+                <exclude name="**/*.pyc"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
                 <exclude name="resources/images/posters/**"/>
                 <exclude name="resources/images/squares/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/kodi-15-isengard/pelisalacarta-kodi-isengard-${version}.zip" basedir="${target}/kodi-15-isengard"/>
-
-    </target>
-
-    <!-- copy-kodi-15-isengard-ui ============================================================ -->
-    <target name="copy-kodi-15-isengard-ui">
-
-        <mkdir dir="${target}/kodi-15-isengard-ui/plugin.video.pelisalacarta-ui"/>
-
-        <copy todir="${target}/kodi-15-isengard-ui/plugin.video.pelisalacarta-ui">
-            <fileset dir="main-classic">
-                <exclude name="**/.*"/>
-                <exclude name="**/.*/**"/>
-                <exclude name="**/*.pyo"/>
-                <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
-                <exclude name="resources/images/bannermenu/**"/>
-                <exclude name="resources/images/banners/**"/>
-                <exclude name="resources/images/fanart/**"/>
-                <exclude name="resources/images/posters/**"/>
-                <exclude name="resources/images/squares/**"/>
-            </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/kodi-15-isengard-ui/plugin.video.pelisalacarta-ui">
             <fileset dir="main-ui">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
         </copy>
-
-        <zip destfile="${target}/kodi-15-isengard-ui/pelisalacarta-ui-kodi-isengard-${version}.zip" basedir="${target}/kodi-15-isengard-ui"/>
-
     </target>
+    <!-- copy-mediaserver-blusens ============================================================ -->
+    <target name="copy-mediaserver-blusens">
+        <zip destfile="${target}/pelisalacarta-blusens-${version}.zip">
+          <mappedresources>
+            <fileset dir="main-classic">
+              <exclude name="**/.*"/>
+              <exclude name="**/.*/**"/>
+              <exclude name="**/*.pyo"/>
+              <exclude name="**/*.pyc"/>
+              <exclude name="resources/*.*"/>
+              <exclude name="resources/skins/**"/>
+              <exclude name="resources/images/posters/**"/>
+              <exclude name="resources/images/servers/**"/>
+              <exclude name="resources/images/fanart/**"/>
+              <exclude name="resources/images/banners/**"/>
+              <exclude name="resources/images/bannermenu/**"/>
+              <exclude name="resources/images/squares/**"/>
+              <exclude name="default.py"/>
+              <exclude name="icon.png"/>
+              <exclude name="fanart.jpg"/>
+              <exclude name="addon.xml"/>
+            </fileset>
+            <globmapper from="*" to="pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-blusens-${version}.zip">
+          <mappedresources>
+            <fileset dir="version-html">
+                  <exclude name="**/.*"/>
+                  <exclude name="**/.*/**"/>
+            </fileset>
+            <globmapper from="*" to="pelisalacarta\*"/>
+          </mappedresources>
+          <mappedresources>
+            <fileset dir="../blusens/applications">
+                  <exclude name="**/.*"/>
+                  <exclude name="**/.*/**"/>
+            </fileset>
+            <globmapper from="*" to="applications\*"/>
+          </mappedresources>
+        </zip>
+        <mkdir dir="${taeget}/blusens/pelisalacarta"/>
 
-    <!-- copy-kodi-14-helix ============================================================ -->
-    <target name="copy-kodi-14-helix">
+        <copy file="version-html/platformcode/settings.xml" todir="${target}/blusens/pelisalacarta/platformcode" overwrite="true"/>
+        <copy file="version-html/core/config.py" todir="${target}/blusens/pelisalacarta/core" overwrite="true"/>
+        <replaceregexp file="${target}/blusens/pelisalacarta/platformcode/settings.xml" match='&lt;setting default="(.*?)" id="server.port" label="Puerto HTTP" type="text"/&gt;' replace='&lt;setting default="8888" id="server.port" label="Puerto HTTP" type="text"/&gt;'/>
+        <replaceregexp file="${target}/blusens/pelisalacarta/platformcode/settings.xml" match='&lt;setting default="(.*?)" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;' replace='&lt;setting default="8889" id="websocket.port" label="Puerto WebSocket" type="text"/&gt;'/>
+        <replaceregexp file="${target}/blusens/pelisalacarta/core/config.py" match='def get_system_platform\(\)\:(.*?)return "mediaserver"' replace='def get_system_platform():\1return "blusens"' flags="gis" byline="false"/>
 
-        <mkdir dir="${target}/kodi-14-helix/plugin.video.pelisalacarta"/>
-
-        <copy todir="${target}/kodi-14-helix/plugin.video.pelisalacarta">
+        <zip update="true" destfile="${target}/pelisalacarta-blusens-${version}.zip" basedir="${target}/blusens"/>
+        <delete dir="${target}/blusens"/>
+    </target>
+    <!-- copy-mediaserver ============================================================ -->
+    <target name="copy-mediaserver">
+        <zip destfile="${target}/pelisalacarta-mediaserver-${version}.zip">
+          <mappedresources>
+            <fileset dir="main-classic">
+              <exclude name="**/.*"/>
+              <exclude name="**/.*/**"/>
+              <exclude name="**/*.pyo"/>
+              <exclude name="**/*.pyc"/>
+              <exclude name="resources/*.*"/>
+              <exclude name="resources/skins/**"/>
+              <exclude name="resources/images/posters/**"/>
+              <exclude name="resources/images/servers/**"/>
+              <exclude name="resources/images/fanart/**"/>
+              <exclude name="resources/images/banners/**"/>
+              <exclude name="resources/images/bannermenu/**"/>
+              <exclude name="resources/images/squares/**"/>
+              <exclude name="default.py"/>
+              <exclude name="icon.png"/>
+              <exclude name="fanart.jpg"/>
+              <exclude name="addon.xml"/>
+            </fileset>
+            <globmapper from="*" to="pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-mediaserver-${version}.zip">
+          <mappedresources>
+            <fileset dir="version-html">
+                  <exclude name="**/.*"/>
+                  <exclude name="**/.*/**"/>
+            </fileset>
+            <globmapper from="*" to="pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
+    </target>    <!-- copy-kodi-15-isengard ============================================================ -->
+    <target name="copy-kodi-15-isengard">
+        <zip destfile="${target}/pelisalacarta-kodi-isengard-${version}.zip">
+          <mappedresources>
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
                 <exclude name="resources/images/posters/**"/>
                 <exclude name="resources/images/squares/**"/>
             </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/kodi-14-helix/plugin.video.pelisalacarta">
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
+    </target>
+
+    <!-- copy-kodi-15-isengard-ui ============================================================ -->
+    <target name="copy-kodi-15-isengard-ui">
+        <zip destfile="${target}/pelisalacarta-ui-kodi-isengard-${version}.zip">
+          <mappedresources>
+            <fileset dir="main-classic">
+                <exclude name="**/.*"/>
+                <exclude name="**/.*/**"/>
+                <exclude name="**/*.pyo"/>
+                <exclude name="**/*.pyc"/>
+                <exclude name="resources/images/bannermenu/**"/>
+                <exclude name="resources/images/banners/**"/>
+                <exclude name="resources/images/fanart/**"/>
+                <exclude name="resources/images/posters/**"/>
+                <exclude name="resources/images/squares/**"/>
+            </fileset>
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-ui-kodi-isengard-${version}.zip">
+          <mappedresources>
+            <fileset dir="main-ui">
+                <exclude name="**/.*"/>
+                <exclude name="**/.*/**"/>
+            </fileset>
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
+    </target>
+ 
+    <!-- copy-kodi-14-helix ============================================================ -->
+    <target name="copy-kodi-14-helix">
+        <zip destfile="${target}/pelisalacarta-kodi-helix-${version}.zip">
+          <mappedresources>
+            <fileset dir="main-classic">
+                <exclude name="**/.*"/>
+                <exclude name="**/.*/**"/>
+                <exclude name="**/*.pyo"/>
+                <exclude name="**/*.pyc"/>
+                <exclude name="resources/images/bannermenu/**"/>
+                <exclude name="resources/images/banners/**"/>
+                <exclude name="resources/images/fanart/**"/>
+                <exclude name="resources/images/posters/**"/>
+                <exclude name="resources/images/squares/**"/>
+            </fileset>
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-kodi-helix-${version}.zip">
+          <mappedresources>
             <fileset dir="version-kodi-14-helix">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/kodi-14-helix/pelisalacarta-kodi-helix-${version}.zip" basedir="${target}/kodi-14-helix"/>
-
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
     </target>
 
     <!-- copy-xbmc-13-gotham ============================================================ -->
     <target name="copy-xbmc-13-gotham">
 
-        <mkdir dir="${target}/xbmc-13-gotham/plugin.video.pelisalacarta"/>
-
-        <copy todir="${target}/xbmc-13-gotham/plugin.video.pelisalacarta">
+        <zip destfile="${target}/pelisalacarta-xbmc-gotham-${version}.zip">
+          <mappedresources>
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
                 <exclude name="resources/images/posters/**"/>
                 <exclude name="resources/images/squares/**"/>
-            </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/xbmc-13-gotham/plugin.video.pelisalacarta">
+             </fileset>
+             <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-xbmc-gotham-${version}.zip">
+          <mappedresources>
             <fileset dir="version-xbmc-13-gotham">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/xbmc-13-gotham/pelisalacarta-xbmc-gotham-${version}.zip" basedir="${target}/xbmc-13-gotham"/>
-
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
     </target>
 
     <!-- copy-xbmc-12-frodo ============================================================ -->
     <target name="copy-xbmc-12-frodo">
 
-        <mkdir dir="${target}/xbmc-12-frodo/plugin.video.pelisalacarta"/>
-
-        <copy todir="${target}/xbmc-12-frodo/plugin.video.pelisalacarta">
+        <zip destfile="${target}/pelisalacarta-xbmc-frodo-${version}.zip">
+          <mappedresources>
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
                 <exclude name="resources/images/posters/**"/>
                 <exclude name="resources/images/squares/**"/>
             </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/xbmc-12-frodo/plugin.video.pelisalacarta">
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-xbmc-frodo-${version}.zip">
+          <mappedresources>
             <fileset dir="version-xbmc-12-frodo">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/xbmc-12-frodo/pelisalacarta-xbmc-frodo-${version}.zip" basedir="${target}/xbmc-12-frodo"/>
-
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
     </target>
 
     <!-- copy-xbmc-11-eden ============================================================ -->
     <target name="copy-xbmc-11-eden">
-
-        <mkdir dir="${target}/xbmc-11-eden/plugin.video.pelisalacarta"/>
-
-        <copy todir="${target}/xbmc-11-eden/plugin.video.pelisalacarta">
+        <zip destfile="${target}/pelisalacarta-xbmc-eden-${version}.zip">
+          <mappedresources>
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
                 <exclude name="resources/images/posters/**"/>
                 <exclude name="resources/images/squares/**"/>
             </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/xbmc-11-eden/plugin.video.pelisalacarta">
-            <fileset dir="version-xbmc-12-frodo">
-                <exclude name="**/.*"/>
-                <exclude name="**/.*/**"/>
-            </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/xbmc-11-eden/plugin.video.pelisalacarta">
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-xbmc-eden-${version}.zip">
+          <mappedresources>
             <fileset dir="version-xbmc-11-eden">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/xbmc-11-eden/pelisalacarta-xbmc-eden-${version}.zip" basedir="${target}/xbmc-11-eden"/>
-
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
     </target>
 
     <!-- copy-xbmc-10-dharma ============================================================ -->
     <target name="copy-xbmc-10-dharma">
-
-        <mkdir dir="${target}/xbmc-10-dharma/plugin.video.pelisalacarta"/>
-
-        <copy todir="${target}/xbmc-10-dharma/plugin.video.pelisalacarta">
+        <zip destfile="${target}/pelisalacarta-xbmc-dharma-${version}.zip">
+          <mappedresources>
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
                 <exclude name="resources/images/posters/**"/>
                 <exclude name="resources/images/squares/**"/>
             </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/xbmc-10-dharma/plugin.video.pelisalacarta">
-            <fileset dir="version-xbmc-12-frodo">
-                <exclude name="**/.*"/>
-                <exclude name="**/.*/**"/>
-            </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/xbmc-10-dharma/plugin.video.pelisalacarta">
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-xbmc-dharma-${version}.zip">
+          <mappedresources>
             <fileset dir="version-xbmc-10-dharma">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/xbmc-10-dharma/pelisalacarta-xbmc-dharma-${version}.zip" basedir="${target}/xbmc-10-dharma"/>
-
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
     </target>
 
 	<!-- copy-xbmc-09-plugin ============================================================ -->
     <target name="copy-xbmc-09-plugin">
-
-        <mkdir dir="${target}/xbmc-09-plugin/plugin.video.pelisalacarta"/>
-
-        <copy todir="${target}/xbmc-09-plugin/plugin.video.pelisalacarta">
+        <zip destfile="${target}/pelisalacarta-xbmc-plugin-${version}.zip">
+          <mappedresources>
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
@@ -426,29 +475,29 @@
                 <exclude name="fanart.jpg"/>
                 <exclude name="icon.png"/>
             </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/xbmc-09-plugin/plugin.video.pelisalacarta">
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-xbmc-plugin-${version}.zip">
+          <mappedresources>
             <fileset dir="version-xbmc-09-plugin">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/xbmc-09-plugin/pelisalacarta-xbmc-plugin-${version}.zip" basedir="${target}/xbmc-09-plugin"/>
+            <globmapper from="*" to="plugin.video.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
     </target>
 
     <!-- copy-boxee ============================================================ -->
     <target name="copy-boxee" description="Copy Boxee files for packaging">
-
-        <mkdir dir="${target}/boxee/info.mimediacenter.pelisalacarta"/>
-
-        <copy todir="${target}/boxee/info.mimediacenter.pelisalacarta">
+        <zip destfile="${target}/pelisalacarta-boxee-${version}.zip">
+          <mappedresources>
             <fileset dir="main-classic">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
                 <exclude name="**/*.pyo"/>
                 <exclude name="**/*.pyc"/>
-                <exclude name="**/*.json"/>
                 <exclude name="resources/images/bannermenu/**"/>
                 <exclude name="resources/images/banners/**"/>
                 <exclude name="resources/images/fanart/**"/>
@@ -458,23 +507,18 @@
                 <exclude name="fanart.jpg"/>
                 <exclude name="icon.png"/>
             </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/boxee/info.mimediacenter.pelisalacarta">
-            <fileset dir="version-xbmc-09-plugin">
-                <exclude name="**/.*"/>
-                <exclude name="**/.*/**"/>
-            </fileset>
-        </copy>
-        <copy overwrite="true" todir="${target}/boxee/info.mimediacenter.pelisalacarta">
+            <globmapper from="*" to="info.mimediacenter.pelisalacarta\*"/>
+          </mappedresources>
+          </zip>
+          <zip update="true" destfile="${target}/pelisalacarta-boxee-${version}.zip">
+          <mappedresources>
             <fileset dir="version-boxee">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
             </fileset>
-        </copy>
-
-        <zip destfile="${target}/boxee/pelisalacarta-boxee-${version}.zip" basedir="${target}/boxee"/>
-        <copy file="${target}/boxee/pelisalacarta-boxee-${version}.zip" tofile="${target}/boxee/info.mimediacenter.pelisalacarta-${versionboxee}.zip" overwrite="true"/>
-
+            <globmapper from="*" to="info.mimediacenter.pelisalacarta\*"/>
+          </mappedresources>
+        </zip>
     </target>
 
     <!-- copy-plex ============================================================ -->
@@ -497,8 +541,6 @@
         <copy todir="${target}/plex/pelisalacarta.bundle/Contents/Libraries/Shared/channels">
             <fileset dir="main-classic/channels">
                 <include name="*.py"/>
-                <include name="*.xml"/>
-                <exclude name="*.json"/>
                 <exclude name="rv_*"/>
             </fileset>
         </copy>
@@ -513,10 +555,6 @@
             <fileset dir="main-classic/core">
                 <include name="*.py"/>
             </fileset>
-        </copy>
-
-        <copy todir="${target}/plex/pelisalacarta.bundle/Contents/Libraries/Shared/lib">
-            <fileset dir="main-classic/lib"/>
         </copy>
 
         <!-- copy plex specific files -->
@@ -539,269 +577,39 @@
 
         <copy file="version-plex/ServiceCode.pys" todir="${target}/plex/pelisalacarta.bundle/Contents/URL Services/UniversalResolver" overwrite="true"/>
 
-        <zip destfile="${target}/plex/pelisalacarta-plex-${version}.zip" basedir="${target}/plex"/>
-    </target>
-
-	<!-- copy-wiimc ============================================================ -->
-    <target name="copy-wiimc">
-        <copy todir="${target}/wiimc/pelisalacarta">
-            <fileset dir=".">
-                <exclude name="target/**"/>
-				<exclude name="addon.xml"/>
-                <exclude name="build.xml"/>
-				<exclude name="pelisalacarta.log"/>
-				<exclude name="pelisalacarta-version.xml"/>
-
-                <exclude name="tester.py"/>
-                <exclude name="download_url.py"/>
-                <exclude name="test_channels.py"/>
-                <exclude name="test_connectors.py"/>
-                <exclude name="script_descargar_lista.py"/>
-
-                <exclude name="fanart.jpg"/>
-                <exclude name="icon.png"/>
-				<exclude name="channelselector-*.py"/>
-                <exclude name="core/platform_name.py"/>
-                <exclude name="**/.*"/>
-                <exclude name="**/.*/**"/>
-                <exclude name="**/*.pyo"/>
-                <exclude name="**/*.pyc"/>
-
-                <exclude name="resources/plexmediaserver/**"/>
-                <exclude name="resources/dreambox/**"/>
-                <exclude name="resources/images/posters/**"/>
-                <exclude name="resources/images/banners/**"/>
-                <exclude name="resources/images/squares/**"/>
-                <exclude name="resources/images/fanart/**"/>
-                <exclude name="resources/images/servers/**"/>
-                <exclude name="resources/images/goear/**"/>
-
-                <exclude name="pelisalacarta/channels/rv_*"/>
-                <exclude name="platformcode/boxee/**"/>
-                <exclude name="platformcode/developer/**"/>
-                <exclude name="platformcode/plex/**"/>
-                <exclude name="platformcode/rss/**"/>
-                <exclude name="platformcode/mediaserver/**"/>
-                <!--exclude name="platformcode/wiimc/**"/-->
-                <exclude name="platformcode/xbmc/**"/>
-                <exclude name="platformcode/xbmcdharma/**"/>
-                <exclude name="platformcode/xbmceden/**"/>
-                <exclude name="platformcode/xbmcfrodo/**"/>
-                <exclude name="platformcode/xbmcgotham/**"/>
-            </fileset>
-        </copy>
-        <copy file="platformcode/wiimc/platform_name.py" tofile="${target}/wiimc/pelisalacarta/core/platform_name.py" overwrite="true"/>
-    </target>
-
-	<!-- copy-mediaserver ============================================================ -->
-    <target name="copy-mediaserver">
-        <copy todir="${target}/mediaserver/pelisalacarta">
-            <fileset dir=".">
-                <exclude name="target/**"/>
-				<exclude name="addon.xml"/>
-                <exclude name="build.xml"/>
-				<exclude name="pelisalacarta.log"/>
-				<exclude name="pelisalacarta-version.xml"/>
-
-                <exclude name="tester.py"/>
-                <exclude name="download_url.py"/>
-                <exclude name="test_channels.py"/>
-                <exclude name="test_connectors.py"/>
-                <exclude name="script_descargar_lista.py"/>
-
-                <exclude name="fanart.jpg"/>
-                <exclude name="icon.png"/>
-				<exclude name="channelselector-*.py"/>
-                <exclude name="core/platform_name.py"/>
-                <exclude name="**/.*"/>
-                <exclude name="**/.*/**"/>
-                <exclude name="**/*.pyo"/>
-                <exclude name="**/*.pyc"/>
-
-                <exclude name="pelisalacarta/channels/rv_*"/>
-                <exclude name="resources/plexmediaserver/**"/>
-                <exclude name="resources/dreambox/**"/>
-                <exclude name="resources/images/posters/**"/>
-                <exclude name="resources/images/banners/**"/>
-                <exclude name="resources/images/squares/**"/>
-                <exclude name="resources/images/fanart/**"/>
-                <exclude name="resources/images/servers/**"/>
-                <exclude name="resources/images/goear/**"/>
-
-                <exclude name="platformcode/boxee/**"/>
-                <exclude name="platformcode/developer/**"/>
-                <exclude name="platformcode/plex/**"/>
-                <exclude name="platformcode/rss/**"/>
-                <exclude name="platformcode/wiimc/**"/>
-                <!--exclude name="platformcode/mediaserver/**"/-->
-                <exclude name="platformcode/xbmc/**"/>
-                <exclude name="platformcode/xbmcdharma/**"/>
-                <exclude name="platformcode/xbmceden/**"/>
-                <exclude name="platformcode/xbmcfrodo/**"/>
-                <exclude name="platformcode/xbmcgotham/**"/>
-            </fileset>
-        </copy>
-        <copy file="platformcode/mediaserver/platform_name.py" tofile="${target}/mediaserver/pelisalacarta/core/platform_name.py" overwrite="true"/>
-    </target>
-
-	<!-- copy-rss ============================================================ -->
-    <target name="copy-rss">
-        <copy todir="${target}/rss/pelisalacarta">
-            <fileset dir=".">
-                <exclude name="target/**"/>
-				<exclude name="addon.xml"/>
-                <exclude name="build.xml"/>
-				<exclude name="pelisalacarta.log"/>
-				<exclude name="pelisalacarta-version.xml"/>
-
-                <exclude name="tester.py"/>
-                <exclude name="download_url.py"/>
-                <exclude name="test_channels.py"/>
-                <exclude name="test_connectors.py"/>
-                <exclude name="script_descargar_lista.py"/>
-
-                <exclude name="fanart.jpg"/>
-                <exclude name="icon.png"/>
-				<exclude name="channelselector-*.py"/>
-                <exclude name="core/platform_name.py"/>
-                <exclude name="**/.*"/>
-                <exclude name="**/.*/**"/>
-                <exclude name="**/*.pyo"/>
-                <exclude name="**/*.pyc"/>
-
-                <exclude name="resources/plexmediaserver/**"/>
-                <exclude name="resources/dreambox/**"/>
-                <exclude name="resources/images/posters/**"/>
-                <exclude name="resources/images/banners/**"/>
-                <exclude name="resources/images/squares/**"/>
-                <exclude name="resources/images/fanart/**"/>
-                <exclude name="resources/images/servers/**"/>
-                <exclude name="resources/images/goear/**"/>
-
-                <exclude name="pelisalacarta/channels/rv_*"/>
-                <exclude name="platformcode/boxee/**"/>
-                <exclude name="platformcode/developer/**"/>
-                <exclude name="platformcode/plex/**"/>
-                <exclude name="platformcode/wiimc/**"/>
-                <exclude name="platformcode/mediaserver/**"/>
-                <!--exclude name="platformcode/rss/**"/-->
-                <exclude name="platformcode/xbmc/**"/>
-                <exclude name="platformcode/xbmcdharma/**"/>
-                <exclude name="platformcode/xbmceden/**"/>
-                <exclude name="platformcode/xbmcfrodo/**"/>
-                <exclude name="platformcode/xbmcgotham/**"/>
-            </fileset>
-        </copy>
-        <copy file="platformcode/rss/platform_name.py" tofile="${target}/rss/pelisalacarta/core/platform_name.py" overwrite="true"/>
-    </target>
-
-	<!-- copy-dreambox ============================================================ -->
-    <target name="copy-dreambox">
-        <copy todir="${target}/dreambox/pelisalacarta">
-            <fileset dir=".">
-				<exclude name="target/**"/>
-				<exclude name="build.xml"/>
-				<exclude name="channelselector-*.py"/>
-				<exclude name="addon*.xml"/>
-				<exclude name="**/.*"/>
-				<exclude name="**/.*/**"/>
-				<exclude name="**/bookmarks/**"/>
-				<exclude name="**/library/**"/>
-				<exclude name="**/*.pyo"/>
-				<exclude name="**/*.pyc"/>
-				<exclude name="**/parametrizacion*.*"/>
-				<exclude name="descriptor.xml"/>
-                <exclude name="fanart.jpg"/>
-                <exclude name="icon.png"/>
-                <exclude name="resources/**"/>
-                <exclude name="platformcode/boxee/**"/>
-                <exclude name="platformcode/developer/**"/>
-                <exclude name="platformcode/plex/**"/>
-                <exclude name="platformcode/wiimc/**"/>
-                <exclude name="platformcode/mediaserver/**"/>
-                <exclude name="platformcode/rss/**"/>
-                <exclude name="platformcode/xbmc/**"/>
-                <exclude name="platformcode/xbmcdharma/**"/>
-                <exclude name="platformcode/xbmceden/**"/>
-
-                <exclude name="tester.py"/>
-                <exclude name="download_url.py"/>
-                <exclude name="test_channels.py"/>
-                <exclude name="test_connectors.py"/>
-                <exclude name="script_descargar_lista.py"/>
-
-                <exclude name="changelog.txt"/>
-                <exclude name="default.py"/>
-                <exclude name="default.tbn"/>
-                <exclude name="LICENSE.txt"/>
-                <exclude name="logging.conf"/>
-                <exclude name="pelisalacarta-version.xml"/>
-                <exclude name="pelisalacarta.log"/>
-                <exclude name="pelisalacarta.py"/>
-                <exclude name="readme.txt"/>
-                <exclude name="pelisalacarta/channels/casttv.py"/>
-                <exclude name="pelisalacarta/channels/animeforos.py"/>
-                <exclude name="pelisalacarta/channels/notas.tb"/>
-                <exclude name="pelisalacarta/channels/tvshack.py"/>
-                <exclude name="lib/elementtree/**"/>
-                <exclude name="lib/gdata/**"/>
-                <exclude name="core/platform_name.py"/>
-                <exclude name="core/config.py"/>
-                <exclude name="core/logger.py"/>
-                <exclude name="pelisalacarta/channels/rv_*"/>
-			</fileset>
-        </copy>
-        <copy todir="${target}/dreambox/pelisalacarta">
-            <fileset dir="resources/dreambox">
-			</fileset>
-        </copy>
-    </target>
-
-    <target name="test-boxee" depends="clean">
-        <mkdir dir="${target}/boxee/info.mimediacenter.pelisalacarta"/>
-        <antcall target="copy-boxee"/>
-
-        <delete dir="/Users/jesus/Library/Application Support/BOXEE/UserData/plugins/video/info.mimediacenter.pelisalacarta"/>
-        <delete dir="/Users/jesus/Library/Application Support/BOXEE/UserData/apps/info.mimediacenter.pelisalacarta"/>
-
-        <copy todir="/Users/jesus/Library/Application Support/BOXEE/UserData/apps/info.mimediacenter.pelisalacarta">
-            <fileset dir="${target}/boxee/info.mimediacenter.pelisalacarta"/>
-        </copy>
-    </target>
-
-    <target name="test-plex" depends="clean">
-        <mkdir dir="${target}/plexmediaserver/pelisalacarta.bundle"/>
-        <antcall target="copy-plexmediaserver"/>
-
-        <delete dir="/Users/jesus/Library/Application Support/Plex Media Server/Plug-ins/pelisalacarta.bundle"/>
-
-        <copy todir="/Users/jesus/Library/Application Support/Plex Media Server/Plug-ins/pelisalacarta.bundle">
-            <fileset dir="${target}/plexmediaserver/pelisalacarta.bundle"/>
-        </copy>
-    </target>
-
-    <target name="versionup"> <!-- depends="package"-->
-        <replaceregexp file="version.xml" match="&lt;tag&gt;(.*?)&lt;/tag&gt;" replace="&lt;tag&gt;${version}&lt;/tag&gt;"/>
-        <replaceregexp file="version.xml" match="&lt;date&gt;(.*?)&lt;/date&gt;" replace="&lt;date&gt;${versiondate}&lt;/date&gt;"/>
-        <replaceregexp file="version.xml" match="&lt;changes&gt;(.*?)&lt;/changes&gt;" replace="&lt;changes&gt;${versionchanges}&lt;/changes&gt;"/>
-
-        <replaceregexp file="default.py" match="__date__ = &quot;([^&quot;]+)&quot;" replace="__date__ = &quot;${versiondate}&quot;"/>
-        <replaceregexp file="default.py" match="__version__ = &quot;([^&quot;]+)&quot;" replace="__version__ = &quot;${version}&quot;"/>
-
-        <replaceregexp file="addon.xml" match="  version=&quot;([^&quot;]+)&quot;" replace="  version=&quot;${version}&quot;"/>
-        <replaceregexp file="platformcode/xbmceden/addon.xml" match="  version=&quot;([^&quot;]+)&quot;" replace="  version=&quot;${version}&quot;"/>
-        <replaceregexp file="platformcode/xbmcdharma/addon.xml" match="  version=&quot;([^&quot;]+)&quot;" replace="  version=&quot;${version}&quot;"/>
-        <replaceregexp file="platformcode/xbmcfrodo/addon.xml" match="  version=&quot;([^&quot;]+)&quot;" replace="  version=&quot;${version}&quot;"/>
-        <replaceregexp file="platformcode/xbmcgotham/addon.xml" match="  version=&quot;([^&quot;]+)&quot;" replace="  version=&quot;${version}&quot;"/>
-        <replaceregexp file="platformcode/wiimc/launcher.py" match="VERSIONTAG = &quot;([^&quot;]+)&quot;" replace="VERSIONTAG = &quot;${version}&quot;"/>
-        <replaceregexp file="platformcode/mediaserver/launcher.py" match="VERSIONTAG = &quot;([^&quot;]+)&quot;" replace="VERSIONTAG = &quot;${version}&quot;"/>
-
-        <replaceregexp file="resources/dreambox/plugin.py" match="pelisalacarta ${oldversion} para Dreambox" replace="pelisalacarta ${version} para Dreambox" flags="g"/>
-
-        <replaceregexp file="platformcode/boxee/config.py" match="TAG_VERSION = &quot;([^&quot;]+)&quot;" replace="TAG_VERSION = &quot;${versionboxee}&quot;"/>
-        <replaceregexp file="platformcode/boxee/config.py" match="TAG_VERSION_XBMC = &quot;([^&quot;]+)&quot;" replace="TAG_VERSION_XBMC = &quot;${version}&quot;"/>
+        <zip destfile="${target}/pelisalacarta-plex-${version}.zip" basedir="${target}/plex"/>
+        <delete dir="${target}/plex"/>
         
-        <replaceregexp file="platformcode/boxee/descriptor.xml" match="&lt;version&gt;(.*?)&lt;/version&gt;" replace="&lt;version&gt;${versionboxee}&lt;/version&gt;"/>
-        <replaceregexp file="platformcode/boxee/index.xml" match="&lt;version&gt;${oldversionboxee}&lt;/version&gt;" replace="&lt;version&gt;${versionboxee}&lt;/version&gt;"/>
+    </target>
+    <target name="test-plex">
+        <delete dir="C:\Users\David\AppData\Local\Plex Media Server\Plug-ins/pelisalacarta.bundle"/>
+        <!-- build folder structure -->
+        <mkdir dir="C:\Users\David\AppData\Local\Plex Media Server\Plug-ins/pelisalacarta.bundle/"/>
+
+
+        <!-- copy common files -->
+        <copy todir="C:\Users\David\AppData\Local\Plex Media Server\Plug-ins/pelisalacarta.bundle/Contents/Libraries/Shared/">
+            <fileset dir="main-classic/">
+                <exclude name="**/.*"/>
+                <exclude name="**/.*/**"/>
+                <exclude name="**/*.pyo"/>
+                <exclude name="**/*.pyc"/>
+                <exclude name="tools/**"/>
+                <exclude name="resources/**"/>
+                <exclude name="platformcode/**"/>
+                <exclude name="addon.xml"/>
+                <exclude name="default.py"/>
+                <exclude name="icon.png"/>
+                <exclude name="fanart.jpg"/>
+            </fileset>
+        </copy>
+        <copy todir="C:\Users\David\AppData\Local\Plex Media Server\Plug-ins/pelisalacarta.bundle/Contents/" overwrite="true">
+            <fileset dir="version-plex/">
+                <exclude name="**/.*"/>
+                <exclude name="**/.*/**"/>
+                <exclude name="**/*.pyo"/>
+                <exclude name="**/*.pyc"/>
+            </fileset>
+        </copy>
     </target>
 </project>

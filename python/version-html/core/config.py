@@ -19,17 +19,12 @@ def get_system_platform():
 def open_settings():
     Opciones =[]
     from xml.dom import minidom
-    settings=""
-    while len(settings)<> os.path.getsize(menufilepath) or len(settings)==0:
-      settings = open(menufilepath, 'rb').read()
+    settings = open(menufilepath, 'rb').read()
     xmldoc= minidom.parseString(settings)
     for category in xmldoc.getElementsByTagName("category"):
       for setting in category.getElementsByTagName("setting"):
-        if setting.getAttribute("type") =="sep":
-          Opciones.append(["" ,"" , setting.getAttribute("type") ,"" ,"" ,"","","",category.getAttribute("label")])
-        else:
-          Opciones.append([setting.getAttribute("label") ,setting.getAttribute("id") , setting.getAttribute("type") ,setting.getAttribute("lvalues") ,setting.getAttribute("values") ,get_setting(setting.getAttribute("id")),setting.getAttribute("option"),setting.getAttribute("enabled"),category.getAttribute("label")])
-    from platformcode import cliente
+        Opciones.append(dict(setting.attributes.items() + [(u"category",category.getAttribute("label")),(u"value",get_setting(setting.getAttribute("id")))]))
+        from platformcode import cliente
     cliente.Acciones().AbrirConfig(Opciones)
 
  
@@ -165,7 +160,7 @@ def get_thumbnail_path(preferred_thumb=""):
     return WEB_PATH
     
 # Fichero de configuración
-menufilepath= os.path.join(get_runtime_path(),"platformcode", "settings.xml")
+menufilepath= os.path.join(get_runtime_path(),"resources", "settings.xml")
 configfilepath = os.path.join( get_data_path() , "settings.xml")
 if not os.path.exists(get_data_path()): os.mkdir(get_data_path())   
 # Literales

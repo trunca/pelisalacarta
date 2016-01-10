@@ -23,6 +23,8 @@ def start():
     
     # Test if all the required directories are created
     config.verify_directories_created()
+    from core import updater
+    updater.checkforupdates()
       
 
 def run(item):
@@ -117,6 +119,11 @@ def run(item):
       for x in range(len(itemlist)):
         itemlist[x].context = AddContext(itemlist[x])
         
+        if not (item.channel == "channelselector" and  item.action in ["mainlist", "channeltypes"]) and \
+           not item.channel in ["descargas","favoritos", "buscador", "ayuda"] and \
+           not "thumb_error" in itemlist[x].thumbnail:
+          itemlist[x].context.append({"title": "Añadir a Favoritos","action": "add_to_favorites"})
+        
       #Imprime en el log el resultado
       PrintItems(itemlist)
       
@@ -172,6 +179,8 @@ def AddContext(item):
         contextCommands.append({"title": config.get_localized_string( 30406 ),"action": "addToFavorites","channel" : "justintv"})
     if "9" in item.context:# Remover canal de favoritos justintv
         contextCommands.append({"title": config.get_localized_string( 30407 ),"action": "removeFromFavorites","channel" : "justintv"})
+  elif type(item.context) == list:
+    contextCommands = item.context
   return contextCommands
   
 def findvideos(item):

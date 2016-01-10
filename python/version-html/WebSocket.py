@@ -25,30 +25,32 @@ class HandleWebSocket(WebSocketServer.WebSocket):
         import json
         JSONData = json.loads(str(self.data))
         
-      if "Request" in JSONData:        
-        sys.argv[JSONData["ID"]]["Request"]=JSONData["Request"].encode("utf8")
+      if "request" in JSONData:        
+        sys.argv[JSONData["id"]]["request"]=JSONData["request"].encode("utf8")
         global ProcessRequest
-        Thread(target=ProcessRequest,args=[JSONData["ID"]], name=JSONData["ID"] ).start()  
+        Thread(target=ProcessRequest,args=[JSONData["id"]], name=JSONData["id"] ).start()  
                  
-      elif "Data" in JSONData:
-        if type(JSONData["Data"]) == unicode:
-          sys.argv[JSONData["ID"]]["Data"]=JSONData["Data"].encode("utf8")
-        else:
-          sys.argv[JSONData["ID"]]["Data"]=JSONData["Data"]
+      elif "data" in JSONData:
+        if type(JSONData["data"]["result"]) == unicode:
+          JSONData["data"]["result"]=JSONData["data"]["result"].encode("utf8")
+
+        sys.argv[JSONData["id"]]["data"]=JSONData["data"]
  
       
 
    def handleConnected(self):
       import random
       ID = "%032x" %(random.getrandbits(128))
-      sys.argv[ID]={"Socket": self, "Request":"", "Data":"","Host":""}
-      self.sendMessage('{"Action": "Connect", "Version": "pelisalacarta '+version+'", "Date":"'+fecha+'", "ID": "'+ ID +'"}')
+      sys.argv[ID]={"socket": self, "request":"", "data":"","host":""}
+      self.sendMessage('{"action": "connect", "data":{"version": "pelisalacarta '+version+'", "date":"'+fecha+'"}, "id": "'+ ID +'"}')
+      from platformcode import launcher
+      Thread(target=launcher.start, name=ID ).start()  
       global MostrarInfo
       MostrarInfo()
 
    def handleClose(self):
     for ID in sys.argv:
-      if sys.argv[ID]["Socket"] == self:
+      if sys.argv[ID]["socket"] == self:
         del sys.argv[ID]
         break
           

@@ -48,9 +48,8 @@ def mainlist(item):
         try:
             # Lee el bookmark
             item = readbookmark(fichero)
-            item.channel="favoritos"
-            item.action = "play"
             item.extra = os.path.join( BOOKMARK_PATH, fichero )
+            item.context.append({"title": "Quitar de Favoritos","action": "remove_from_favorites"})
             itemlist.append(item)
         except:
             for line in sys.exc_info():

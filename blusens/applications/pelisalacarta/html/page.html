@@ -10,16 +10,21 @@
     <script type="text/javascript" src="/hedjsdk/jquery.hed.js"></script>      
     <script type="text/javascript" src="/blusens/js/HED.helpers.js"></script>
     <script type="text/javascript" src="/blusens/js/browser_player.js"></script>
-    <script type="text/javascript" src="js/pelisalacarta.js"></script>
+    <script type="text/javascript" src="js/vars.js"></script>
+    <script type="text/javascript" src="js/navigation.js"></script>
+    <script type="text/javascript" src="js/popups.js"></script>
+    <script type="text/javascript" src="js/ui.js"></script>
+    <script type="text/javascript" src="js/protocol.js"></script>
+    <script type="text/javascript" src="js/socket.js"></script>
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
   </head> 
   <body> 
       <!--/ProgressBG -->	
     <div id="ProgressBarBG-popup" class="ProgressBarBG">
       <div Class="ProgressTitulo" id="ProgressBarBG-Titulo">
-      David
       </div>
       <div Class="ProgressTexto" id="ProgressBarBG-Text">
-      Ramia
       </div>
       <div Class="Progress" id="ProgressBar-BarBG">
         <div Class="ProgressBarFondo" id="ProgressBar-BarFondo">
@@ -34,7 +39,7 @@
     
     <!-- Lista -->
     <div id="Lista-popup" class="Lista">
-      <a href="#" onclick="EnviarDatos('-1');CerrarDialogos();" class="BotonCerrar"></a>
+      <a href="#" onclick="EnviarDatos({'id':this.parentNode.RequestID, 'result':false });CerrarDialogos();" class="BotonCerrar"></a>
       <div class="Titulo" id="Lista-titulo">Menu
       </div>
       <div class="ListaContenido" id="Lista">
@@ -45,26 +50,26 @@
     
     <!-- Alert -->
     <div id="Alert-popup" class="Alert">
-      <a href="#" onclick="EnviarDatos('OK');CerrarDialogos();" class="BotonCerrar"></a>
+      <a href="#" onclick="EnviarDatos({'id':this.parentNode.RequestID, 'result':true });CerrarDialogos();" class="BotonCerrar"></a>
       <div class="Titulo" id="Alert-Titulo">
       </div>
       <div Class="AlertTexto" id="Alert-Text">
       </div>
       <div class="Botones">
-        <a href="#" class="Boton BotonIcon BotonOK" onclick="EnviarDatos('OK');CerrarDialogos();" >Aceptar</a>
+        <a href="#" class="Boton BotonIcon BotonOK" onclick="EnviarDatos({'id':this.parentNode.parentNode.RequestID, 'result':true });CerrarDialogos();" >Aceptar</a>
       </div>
     </div>
 
     <!-- AlertYesNo -->
     <div id="AlertYesNo-popup" class="Alert">
-      <a href="#" onclick="EnviarDatos('no');CerrarDialogos();" class="BotonCerrar"></a>
+      <a href="#" onclick="EnviarDatos({'id':this.parentNode.RequestID, 'result':false });CerrarDialogos();" class="BotonCerrar"></a>
       <div class="Titulo" id="AlertYesNo-Titulo">
       </div>
       <div Class="AlertTexto" id="AlertYesNo-Text">
       </div>
       <div class="Botones">
-        <a href="#" class="Boton BotonIcon BotonOK" onclick="EnviarDatos('yes');CerrarDialogos();" >Si</a>
-        <a href="#" class="Boton BotonIcon BotonClose" onclick="EnviarDatos('no');CerrarDialogos();" >No</a>
+        <a href="#" class="Boton BotonIcon BotonOK" onclick="EnviarDatos({'id':this.parentNode.parentNode.RequestID, 'result':true });CerrarDialogos();" >Si</a>
+        <a href="#" class="Boton BotonIcon BotonClose" onclick="EnviarDatos({'id':this.parentNode.parentNode.RequestID, 'result':false });CerrarDialogos();" >No</a>
       </div>
     </div> 
     <!-- Servidor -->
@@ -103,15 +108,15 @@
     </div>
     <!-- Keyboard -->
     <div id="Keyboard-popup" class="Keyboard">
-      <a href="#" onclick="EnviarDatos('-1');CerrarDialogos();" class="BotonCerrar"></a>
+      <a href="#" onclick="EnviarDatos({'id':this.parentNode.RequestID, 'result':null });CerrarDialogos();" class="BotonCerrar"></a>
       <div class="Titulo" id="Keyboard-Titulo">
       </div>
       <div Class="KeyboardTexto">
       <div class="Text"><input class="Text" type="text" id="Keyboard-Text" ></div>
       </div>
       <div class="Botones">
-        <a href="#" class="Boton BotonIcon BotonOK" onclick="EnviarDatos(document.getElementById('Keyboard-Text').value);CerrarDialogos();" >Aceptar</a>
-        <a href="#" class="Boton BotonIcon BotonClose" onclick="EnviarDatos('-1');CerrarDialogos();" >Cancelar</a>
+        <a href="#" class="Boton BotonIcon BotonOK" onclick="EnviarDatos({'id':this.parentNode.parentNode.RequestID, 'result':document.getElementById('Keyboard-Text').value });CerrarDialogos();AbrirLoading();" >Aceptar</a>
+        <a href="#" class="Boton BotonIcon BotonClose" onclick="EnviarDatos({'id':this.parentNode.parentNode.RequestID, 'result':null });CerrarDialogos();" >Cancelar</a>
       </div>
     </div>  
 
@@ -135,13 +140,13 @@
     </div> 
     <!--/Config -->	
     <div id="Config-popup" class="Config">
-      <a href="#" onclick="GuardarConfig(false);CerrarDialogos();" class="BotonCerrar"></a>
+      <a href="#" onclick="GuardarConfig({'id':this.parentNode.RequestID, 'result':false });CerrarDialogos();" class="BotonCerrar"></a>
       <div class="Titulo" id="Config-Titulo">
       </div>
       <div class="Config-Secciones" id="Config-secciones">
       </div>
       <div id="Config" class="Config-Opciones">
-        <ul data-role="listview" id="Config">
+        <ul id="Config">
         </ul>
       </div>
       <div id="Config-botones" class="Botones">

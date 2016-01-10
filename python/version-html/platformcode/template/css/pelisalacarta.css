@@ -724,6 +724,12 @@ div.Config > div.Config-Opciones > ul.ListItem > li.ListItem > div.Separador {
     height: 5px;
     background-color: #01455c;
 }
+div.Config > div.Config-Opciones > ul.ListItem > li.ListItem > div.LabelSeparador {
+    color:#000000;
+    font-size: 14px;
+    font-weight:bold;
+    margin-left:5px;
+}
 div.Config > div.Config-Opciones > ul.ListItem > li.ListItem > div.ListItem-hover {
     background-color: #01455c;
     border-color: #ffffff;

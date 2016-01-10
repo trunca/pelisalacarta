@@ -13,8 +13,8 @@ from core import config
 from core.item import Item
 import threading
 from threading import Thread
-import navigation
-from core import guitools
+from platformcode import launcher
+from platformcode import platformtools
 
 sys.argv ={}
 sys.path.append (os.path.join( config.get_runtime_path(),'lib'))
@@ -47,40 +47,18 @@ def ReloadModules():
 
 
 def ProcessRequest(ID):
-  sys.argv[ID]["Host"] = "http://"+ myip + ":" + str(PORT)
+  sys.argv[ID]["host"] = "http://"+ myip + ":" + str(PORT)
   ReloadModules()
           
   try:
-    if sys.argv[ID]["Request"]:
+    if sys.argv[ID]["request"]:
       item = Item()
-      item.fromurl(sys.argv[ID]["Request"])
+      item.fromurl(sys.argv[ID]["request"])
     else:
       item = Item(channel="channelselector", action="mainlist")
+    launcher.run(item)
 
-    logger.info("-----------------------------------------------------------------------")
-    logger.info("Item Recibido: " + item.tostring())
-    logger.info("-----------------------------------------------------------------------")
-    
-    if (item.channel=="channelselector" and item.action=="mainlist") or (item.channel=="novedades" and item.action=="mainlist") or (item.channel=="buscador" and item.action=="mainlist") or (item.channel=="channelselector" and item.action=="channeltypes"):
-      WindowMode = 0
-    elif item.channel=="channelselector" and item.action=="listchannels":
-      WindowMode = 1
-    else:
-      WindowMode = 2
-      
-    itemlist = navigation.NextItem(item)
-    if type(itemlist)==list: 
-      if not (item.channel=="channelselector" and item.action=="mainlist") and not itemlist[0].action=="go_back":
-        itemlist.insert(0,Item(title="Atrás", action="go_back",thumbnail="%sthumb_atras.png"))
 
-      for x in range(len(itemlist)):
-        nitem, title, thumbnail = navigation.ItemInfo(item, itemlist[x], WindowMode)
-        guitools.AddItem(nitem, title, thumbnail, WindowMode)        
-      guitools.CloseDirectory(item)
-
-    if item.channel=="channelselector" and item.action=="mainlist":
-      from core import updater
-      updater.checkforupdates()
 
   except Exception as e:
     import traceback
@@ -89,11 +67,11 @@ def ProcessRequest(ID):
     patron = 'File "'+os.path.join(config.get_runtime_path(),"channels","").replace("\\","\\\\")+'([^.]+)\.py"'
     canal = scrapertools.find_single_match(traceback.format_exc(),patron)
     if canal:
-      guitools.Dialog_OK(
+      platformtools.AlertDialog(
         "Se ha producido un error en el canal " + canal,
         "Esto puede ser devido a varias razones: \n - El servidor no está disponible, o no esta respondiendo.\n - Cambios en el diseño de la web.\n - Etc...\nComprueba el log para ver mas detalles del error.")
     else:
-      guitools.Dialog_OK(
+      platformtools.AlertDialog(
         "Se ha producido un error en pelisalacarta",
         "Comprueba el log para ver mas detalles del error." )
 
@@ -110,12 +88,12 @@ def MostrarInfo():
     print ("DownloadList Path : " + config.get_setting("downloadlistpath"))
     print ("Bookmark Path     : " + config.get_setting("bookmarkpath"))  
     print ("Library Path      : " + config.get_setting("library_path"))  
-    print ("Cache Path        : " + config.get_setting("cache.dir"))  
-    print ("Cookies Path      : " + config.get_setting("cookies.dir"))  
+    print ("Cache Path        : " + config.get_setting("cachepath"))  
+    print ("Cookies Path      : " + config.get_setting("cookiespath"))  
     print ("--------------------------------------------------------------------")
     conexiones = []
     for a in sys.argv:
-      conexiones.append(sys.argv[a]["Socket"].client.getpeername()[0])
+      conexiones.append(sys.argv[a]["socket"].client.getpeername()[0])
     if len(conexiones) >0:
       print ("Clientes conectados:")
       for conexion in conexiones:
@@ -145,9 +123,9 @@ def start():
       logger.info("Download Path     : " + config.get_setting("downloadpath") )
       logger.info("DownloadList Path : " + config.get_setting("downloadlistpath"))
       logger.info("Bookmark Path     : " + config.get_setting("bookmarkpath"))
-      logger.info("Library Path      : " + config.get_setting("library_path"))
-      logger.info("Cache Path        : " + config.get_setting("cache.dir"))  
-      logger.info("Cookies Path      : " + config.get_setting("cookies.dir"))  
+      logger.info("Library Path      : " + config.get_setting("librarypath"))
+      logger.info("Cache Path        : " + config.get_setting("cachepath"))  
+      logger.info("Cookies Path      : " + config.get_setting("cookiespath"))  
       logger.info("--------------------------------------------------------------------")
       MostrarInfo()
       

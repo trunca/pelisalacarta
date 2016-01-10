@@ -81,12 +81,13 @@ def getchanneltypes(preferred_thumb=""):
                 # Si es un canal para adultos y el modo adulto está desactivado, se lo salta
                 if channel_parameters["adult"]=="true" and config.get_setting("adult_mode")=="false":
                     continue
-
+                
                 # Si el canal está en un idioma filtrado
                 if channel_language!="all" and channel_parameters["language"]!=channel_language:
                     continue
-
+                
                 categories = channel_parameters["categories"]
+                
                 for category in categories:
                     logger.info("channelselector.filterchannels category="+category)
                     if category not in channel_types and category in valid_types:

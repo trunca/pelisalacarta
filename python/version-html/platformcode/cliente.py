@@ -16,360 +16,257 @@ ItemList = []
 
 def getThread():
   return threading.current_thread().name
+  
 def SendMessage(Data):
+  import random
+  ID = "%032x" %(random.getrandbits(128))
+  Data["id"] = ID
   try:
-    sys.argv[getThread()]["Socket"].sendMessage(Data)
+    sys.argv[getThread()]["socket"].sendMessage(json.dumps(Data))
+    return ID
   except:
     pass
 
-def GetData():
+def GetData(ID):
   try:
-    data = sys.argv[getThread()]["Data"]
+    if sys.argv[getThread()]["data"]["id"] == ID:
+      data = sys.argv[getThread()]["data"]["result"]
+    else:
+      data = None
   except:
     data = ""
   return data
   
 def GetHost():
   try:
-    data = sys.argv[getThread()]["Host"]
+    data = sys.argv[getThread()]["host"]
   except:
     data = ""
   return data
   
-def SetData(Data):
-  try:
-    sys.argv[getThread()]["Data"] = Data
-  except:
-    pass
-  
 class Dialogo(object):
   def ProgresoBGAbrir(self,Titulo="",Mensaje="", Porcentaje=0):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="ProgressBG" 
-    JsonData["Title"]=Titulo
-    JsonData["Text"]=Mensaje
-    JsonData["Progress"]=Porcentaje
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'Progress' enviada.")
-    while GetData() == None:
+    JsonData["action"]="ProgressBG" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["text"]=Mensaje
+    JsonData["data"]["percent"]=Porcentaje
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
-
+      
     return self
     
   def ProgresoBGActualizar(self,Titulo="",Mensaje="",Porcentaje=0):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="ProgressBGUpdate" 
-    JsonData["Title"]=Titulo
-    JsonData["Text"]=Mensaje
-    JsonData["Progress"]=Porcentaje
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'ProgressUpdate' enviada")
-    #while GetData() == None:
-      #continue
-    ##logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
+    JsonData["action"]="ProgressBGUpdate" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["text"]=Mensaje
+    JsonData["data"]["percent"]=Porcentaje
+    SendMessage(JsonData)
           
   def ProgresoBGCerrar(self):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="ProgressBGClose" 
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'ProgressClose' enviada")
-    while GetData() == None:
-      continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
-
+    JsonData["action"]="ProgressBGClose" 
+    JsonData["data"]={}
+    SendMessage(JsonData)
 
   def ProgresoAbrir(self,Titulo="",Mensaje="", Porcentaje=0):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="Progress" 
-    JsonData["Title"]=Titulo
-    JsonData["Text"]=Mensaje
-    JsonData["Progress"]=Porcentaje
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'Progress' enviada.")
-    while GetData() == None:
+    JsonData["action"]="Progress" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["text"]=Mensaje
+    JsonData["data"]["percent"]=Porcentaje
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
 
     return self
     
   def ProgresoActualizar(self,Titulo="",Mensaje="",Porcentaje=0):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="ProgressUpdate" 
-    JsonData["Title"]=Titulo
-    JsonData["Text"]=Mensaje
-    JsonData["Progress"]=Porcentaje
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'ProgressUpdate' enviada")
-    #while GetData() == None:
-      #continue
-    ##logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
+    JsonData["action"]="ProgressUpdate" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["text"]=Mensaje
+    JsonData["data"]["percent"]=Porcentaje
+    SendMessage(JsonData)
       
   def ProgresoIsCanceled(self):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="ProgressIsCanceled" 
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'ProgressIsCanceled' enviada")
-    while GetData() == None:
+    JsonData["action"]="ProgressIsCanceled" 
+    JsonData["data"]={}
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
-    return GetData()
+      
+    return GetData(ID)
 
-    
   def ProgresoCerrar(self):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="ProgressClose" 
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'ProgressClose' enviada")
-    while GetData() == None:
+    JsonData["action"]="ProgressClose" 
+    JsonData["data"]={}
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
 
   def MostrarOK(self,Titulo="",Mensaje=""):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="Alert" 
-    JsonData["Title"]=Titulo
-    JsonData["Text"]=unicode(Mensaje ,"utf8","ignore").encode("utf8")
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'Alert' enviada")
-    while GetData() == None:
+    JsonData["action"]="Alert" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["text"]=unicode(Mensaje ,"utf8","ignore").encode("utf8")
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
     
   def MostrarSiNo(self,Titulo="",Mensaje=""):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="AlertYesNo" 
-    JsonData["Title"]=Titulo
-    JsonData["Text"]=Mensaje
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'AlertYesNo' enviada")
-    while GetData() == None:
+    JsonData["action"]="AlertYesNo" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["text"]=unicode(Mensaje ,"utf8","ignore").encode("utf8")
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
-    if GetData() == "yes":
-      return True
-    else:
-      return False
+
+    return GetData(ID)
+
     
   def MostrarTeclado(self,Texto="",Titulo="", Password=False):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="Keyboard" 
-    JsonData["Title"]=Titulo
-    JsonData["Text"]=Texto
-    JsonData["Password"]=str(Password)
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'Keyboard' enviada")
-    while GetData() == None:
+    JsonData["action"]="Keyboard" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["text"]=Texto
+    JsonData["data"]["password"]=Password
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
-    return GetData()
+    return GetData(ID)
 
   def Select(self,Titulo,Elementos=[]):
-    SetData(None)
     JsonData = {}
-    JsonList={}
-    JsonList["Count"]=0
+    JsonData["action"]="List"
+    JsonData["data"]={}
+    JsonData["data"]["title"]=Titulo
+    JsonData["data"]["list"]=[]
     for Elemento in Elementos:
-      JsonList["Title"+str(JsonList["Count"])] = Elemento
-      JsonList["Count"]+=1
-
-    JsonData["Action"]="List" 
-    JsonData["Title"]=Titulo
-    JsonData["List"]=JsonList
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'List' enviada")
-    while GetData() == None:
+      JsonData["data"]["list"].append(Elemento)
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
-    if GetData() <> "-1":
-      return int(GetData())
-    else:
-      return None
+    return GetData(ID)
+
 
 class Acciones(object):
 
   def Refrescar(self,Scroll=False):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="Refresh" 
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'Refresh' enviada")
-    while GetData() == None:
+    JsonData["action"]="Refresh" 
+    JsonData["data"]={}
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
     
-  def AddItem(self,Title="",Thumbnail="", Fanart="", Plot="",Url="",ContextMenu=[], Mode=0, Action=""):
+  def AddItem(self,Title="",Thumbnail="", Fanart="", Plot="",Url="",ContextMenu=[], Action=""):
     global ItemList
-    SetData(None)
-    JsonData = {}
-    JsonContext={}
-    JsonContext["Count"]=0
+    JsonItem = {}
+    JsonItem["title"]=Title
+    JsonItem["thumbnail"]= Thumbnail
+    JsonItem["fanart"]=Fanart
+    JsonItem["plot"]=Plot
+    JsonItem["action"]=Action
+    JsonItem["url"]=Url
+    JsonItem["context"]=[]
     for Comando in ContextMenu:
-      JsonContext["Title"+str(JsonContext["Count"])] = Comando[0]
-      JsonContext["Url"+str(JsonContext["Count"])] = Comando[1]
-      JsonContext["Count"]+=1
-      
-    JsonData["Action"]="AddItem"
-    JsonData["Mode"]=Mode    
-    JsonData["Title"]=Title
-    JsonData["Thumbnail"]= Thumbnail
-    JsonData["Fanart"]=Fanart
-    JsonData["Plot"]=Plot
-    JsonData["ItemAction"]=Action
-    JsonData["Url"]=Url
-    JsonData["Host"] =  GetHost()
-    JsonData["ContextMenu"]=JsonContext
-    ItemList.append(JsonData)
-    #SendMessage(json.dumps(JsonData))
+      JsonItem["context"].append({"title":Comando[0],"url": Comando[1]})
+    ItemList.append(JsonItem)
 
-  def EndItems(self):
+
+  def EndItems(self, Mode=0):
     global ItemList
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="EndItems" 
-    JsonData["Itemlist"]=ItemList
-    SendMessage(json.dumps(JsonData))
+    JsonData["action"]="EndItems"
+    JsonData["data"]={}
+    JsonData["data"]["itemlist"]=ItemList
+    JsonData["data"]["mode"]=Mode   
+    JsonData["data"]["host"]=GetHost()   
+    ID = SendMessage(JsonData)
     ItemList= []
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'EndItems' enviada")
-    while GetData() == None:
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
+
     
   def Play(self,Title="",Plot="",Url="", ServerURL=""):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="Play" 
-    JsonData["Title"]= Title
-    JsonData["Plot"]= Plot
-    JsonData["Url"] =  Url
-    JsonData["ServerUrl"] =  ServerURL
-    JsonData["Host"] =  GetHost()
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'Play' enviada")
-    while GetData() == None:
+    JsonData["action"]="Play" 
+    JsonData["data"]={}
+    JsonData["data"]["title"]= Title
+    JsonData["data"]["plot"]= Plot
+    JsonData["data"]["video_url"] =  Url
+    JsonData["data"]["url"] =  ServerURL
+    JsonData["data"]["host"] =  GetHost()
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
 
-  def AbrirConfig(self,Opciones):
+  def AbrirConfig(self,items):
     from core import config
-    SetData(None)
     JsonData = {}
-    JsonOpciones={}
-    JsonOpciones["Count"]=0
-    for Opcion in Opciones:
-      try:
-        Opcion[0] = get_localized_string(int(Opcion[0]))
-      except:
-        pass
-      try:
-        ops = Opcion[3].split("|")
-        for x, op in enumerate(ops):
-          ops[x] = get_localized_string(int(ops[x])) 
-        Opcion[3] = "|".join(ops)
-      except:
-        pass
-      try:
-        Opcion[8] = get_localized_string(int(Opcion[8]))
-      except:
-        pass
-      
-      JsonOpciones["Label"+str(JsonOpciones["Count"])] = Opcion[0]
-      JsonOpciones["Id"+str(JsonOpciones["Count"])] = Opcion[1]
-      JsonOpciones["Type"+str(JsonOpciones["Count"])] = Opcion[2]
-      JsonOpciones["Lvalues"+str(JsonOpciones["Count"])] = Opcion[3]
-      JsonOpciones["Values"+str(JsonOpciones["Count"])] = Opcion[4]
-      JsonOpciones["Value"+str(JsonOpciones["Count"])] = Opcion[5]
-      JsonOpciones["Option"+str(JsonOpciones["Count"])] = Opcion[6]
-      JsonOpciones["Enabled"+str(JsonOpciones["Count"])] = Opcion[7]
-      JsonOpciones["Category"+str(JsonOpciones["Count"])] = Opcion[8]
-      JsonOpciones["Count"]+=1
-      
-    JsonData["Action"]="OpenConfig"    
-    JsonData["Options"]=JsonOpciones
-
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'OpenConfig' enviada")
-    while GetData() == None:
-      continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
+    JsonData["action"]="OpenConfig"   
+    JsonData["data"]={}
+    JsonData["data"]["items"]=[]
     
-    if GetData():
-      if GetData() <> "-1":
-        JsonRespuesta = json.loads(GetData())
-        from core import config
-        config.set_settings(JsonRespuesta)
+    for item in items:
+      for key in item:
+        if key in ["lvalues", "label", "category"]:
+          try:
+            ops = item[key].split("|")
+            for x, op in enumerate(ops):
+              ops[x] = get_localized_string(int(ops[x])) 
+            item[key] = "|".join(ops)
+          except:
+            pass
+
+      JsonData["data"]["items"].append(item)
+    ID = SendMessage(JsonData)
+
+    while GetData(ID) == None:
+      pass
+      
+    if GetData(ID):
+      from core import config
+      config.set_settings(GetData(ID))
       JsonData = {}
-      JsonData["Action"]="HideLoading"
-      SendMessage(json.dumps(JsonData))
+    JsonData["action"]="HideLoading"
+    JsonData["data"] = {}
+    SendMessage(JsonData)
       
    
  
   def Update(self,url):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="Update" 
-    JsonData["Url"]=url
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'Update' enviada")
-    while GetData() == None:
+    JsonData["action"]="Update" 
+    JsonData["data"]={}
+    JsonData["data"]["url"]=url
+    ID = SendMessage(JsonData)
+
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------")
-    
+
     
   def isPlaying(self):
-    SetData(None)
     JsonData = {}
-    JsonData["Action"]="isPlaying" 
-    SendMessage(json.dumps(JsonData))
-    #logger.info("-----------------------------------------------------------------------")
-    #logger.info("Petición de 'isPlaying' enviada")
-    while GetData() == None:
+    JsonData["action"]="isPlaying" 
+    JsonData["data"]={}
+    ID = SendMessage(JsonData)
+    while GetData(ID) == None:
       continue
-    #logger.info("Respuesta Recibida: " + GetData())
-    #logger.info("-----------------------------------------------------------------------") 
-    return GetData()
+    return GetData(ID)
 
   
     

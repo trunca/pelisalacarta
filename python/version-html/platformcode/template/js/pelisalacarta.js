@@ -668,12 +668,13 @@ function CerrarDialogos() {
 }
 
 function AbrirMenu(Title,Lista) {
-  AbrirLista(Title,atob(Lista))
+  AbrirLista(Title,atob(Lista),{"ID":""})
 }
 
-function AbrirLista(Title,Lista) {
+function AbrirLista(id,data,lista) {
   document.getElementById("Overlay").style.display="block"
-  document.getElementById("Lista-titulo").innerHTML = Title;
+  document.getElementById("Lista-titulo").innerHTML = data["title"];
+  document.getElementById("Lista-popup").RequestID = id
   document.getElementById("Lista").innerHTML ='<ul class="Lista">' + Lista + '</ul>';
   document.getElementById("Lista-popup").style.display="block";
   document.getElementById("Lista").children[0].children[0].children[0].focus()
@@ -693,73 +694,79 @@ function AbrirPlayer(Title,Player) {
   }, 500);
 }
 
-function AbrirAlert(Title,Text) {
+function AbrirAlert(id,data) {
+
   document.getElementById("Overlay").style.display="block";
   document.getElementById("Alert-popup").style.display="block";
-  document.getElementById("Alert-Text").innerHTML = Text
-  document.getElementById("Alert-Titulo").innerHTML = Title;
+  document.getElementById("Alert-popup").RequestID = id
+  document.getElementById("Alert-Text").innerHTML = data["text"].replace(new RegExp("\n", 'g'), "<br/>")
+  document.getElementById("Alert-Titulo").innerHTML = data["title"];
   document.getElementById("Alert-popup").children[3].children[0].focus()
   document.getElementById("Alert-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("Alert-popup").offsetHeight / 2 + "px"
 }
 
-function AbrirAlertYesNo(Title,Text) {
+function AbrirAlertYesNo(id,data){
   document.getElementById("Overlay").style.display="block";
   document.getElementById("AlertYesNo-popup").style.display="block";
-  document.getElementById("AlertYesNo-Text").innerHTML = Text
-  document.getElementById("AlertYesNo-Titulo").innerHTML = Title
+  document.getElementById("AlertYesNo-popup").RequestID = id
+  document.getElementById("AlertYesNo-Text").innerHTML = data["text"].replace(new RegExp("\n", 'g'), "<br/>")
+  document.getElementById("AlertYesNo-Titulo").innerHTML = data["title"];
   document.getElementById("AlertYesNo-popup").children[3].children[0].focus()
   document.getElementById("AlertYesNo-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("AlertYesNo-popup").offsetHeight / 2 + "px"
 }
 
 
-function AbrirKeyboard(Title,Text,Password) {
-  if (Title === "") {Title = "Teclado";}
-  if (Password == "True") {document.getElementById("Keyboard-Text").type = "password"}
+function AbrirKeyboard(id,data) {
+  if (data["title"] === "") {data["title"] = "Teclado";}
+  if (data["pasword"] == true) {document.getElementById("Keyboard-Text").type = "password"}
   else {document.getElementById("Keyboard-Text").type = "text"}
+  document.getElementById("Keyboard-popup").RequestID = id
   document.getElementById("Overlay").style.display="block";
   document.getElementById("Keyboard-popup").style.display="block";
-  document.getElementById("Keyboard-Text").value = Text
-  document.getElementById("Keyboard-Titulo").innerHTML = Title
+  document.getElementById("Keyboard-Text").value = data["text"]
+  document.getElementById("Keyboard-Titulo").innerHTML = data["title"]
   document.getElementById("Keyboard-popup").children[2].children[0].children[0].focus()
   document.getElementById("Keyboard-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("Keyboard-popup").offsetHeight / 2 + "px"
 }
 
-function AbrirProgressBG(Title,Text,Porcent) {
+function AbrirProgressBG(id,data) {
   document.getElementById("ProgressBarBG-popup").style.display="block";
-  document.getElementById("ProgressBarBG-Text").innerHTML = Text
-  document.getElementById("ProgressBarBG-Titulo").innerHTML = Title
-  document.getElementById("ProgressBarBG-Abance").style.width = Porcent + "%";
+  document.getElementById("ProgressBarBG-popup").RequestID = id
+  document.getElementById("ProgressBarBG-Text").innerHTML = data["text"];
+  document.getElementById("ProgressBarBG-Titulo").innerHTML = data["title"];
+  document.getElementById("ProgressBarBG-Abance").style.width = data["percent"] + "%";
 }
 
-function UpdateProgressBG(Title,Text,Porcent) {
-  document.getElementById("ProgressBarBG-Text").innerHTML = Text
-  document.getElementById("ProgressBarBG-Titulo").innerHTML = Title
-  document.getElementById("ProgressBarBG-Abance").style.width = Porcent + "%";
+function UpdateProgressBG(id,data) {
+  document.getElementById("ProgressBarBG-Text").innerHTML = data["text"].replace(new RegExp("\n", 'g'), "<br/>")
+  document.getElementById("ProgressBarBG-Titulo").innerHTML = data["title"]
+  document.getElementById("ProgressBarBG-Abance").style.width = data["percent"] + "%";
 }
 
 function CerrarProgressBG() {
   document.getElementById("ProgressBarBG-popup").style.display="none";
 }
 
-function AbrirProgress(Title,Text,Porcent) {
+function AbrirProgress(id,data) {
+  document.getElementById("ProgressBar-popup").RequestID = id
   document.getElementById("Overlay").style.display="block";
   document.getElementById("ProgressBar-popup").style.display="block";
-  document.getElementById("ProgressBar-Text").innerHTML = Text
-  document.getElementById("ProgressBar-Titulo").innerHTML = Title
+  document.getElementById("ProgressBar-Text").innerHTML = data["text"].replace(new RegExp("\n", 'g'), "<br/>")
+  document.getElementById("ProgressBar-Titulo").innerHTML = data["title"]
   document.getElementById("ProgressBar-Cancelled").checked = "";
-  document.getElementById("ProgressBar-Abance").style.width = Porcent + "%";
+  document.getElementById("ProgressBar-Abance").style.width = data["percent"] + "%";
   document.getElementById("ProgressBar-popup").children[4].children[0].focus()
   document.getElementById("ProgressBar-popup").style.top = document.getElementById("Pagina").offsetHeight / 2 - document.getElementById("ProgressBar-popup").offsetHeight / 2 + "px"
 }
 
-function UpdateProgress(Title,Text,Porcent) {
-  document.getElementById("ProgressBar-Text").innerHTML = Text
+function UpdateProgress(id,data) {
+  document.getElementById("ProgressBar-Text").innerHTML = data["text"].replace(new RegExp("\n", 'g'), "<br/>")
   if (document.getElementById("ProgressBar-Cancelled").checked !="") {
-    document.getElementById("ProgressBar-Titulo").innerHTML = Title + " " + Porcent + "% - Cancelando...";
+    document.getElementById("ProgressBar-Titulo").innerHTML = data["title"] + " " + data["percent"] + "% - Cancelando...";
   } else {
-  document.getElementById("ProgressBar-Titulo").innerHTML = Title + " " + Porcent + "%";
+  document.getElementById("ProgressBar-Titulo").innerHTML = data["title"] + " " + data["percent"] + "%";
   }
-  document.getElementById("ProgressBar-Abance").style.width = Porcent + "%";
+  document.getElementById("ProgressBar-Abance").style.width = data["percent"] + "%";
 }
 
 function CerrarProgress() {
@@ -768,7 +775,8 @@ function CerrarProgress() {
   ItemFocus.focus()
 }
 
-function AbrirConfig(Secciones,Lista){
+function AbrirConfig(id, data, Secciones,Lista){
+  document.getElementById("Config-popup").RequestID = id
   document.getElementById("Config-secciones").innerHTML = Secciones
   document.getElementById("Config").innerHTML = Lista;
   document.getElementById("Config-Titulo").innerHTML = "Opciones";
@@ -818,114 +826,116 @@ function WebSocketSend(data) {
         setTimeout(WebSocketSend, 500, data);
         return;
     } else {
-      data["ID"] = ID
+      data["id"] = ID
       websocket.send(JSON.stringify(data));
     }
 }
 
 
 function GetResponses(data) {
-    JsonResponse = JSON.parse(data);
-    switch (JsonResponse["Action"]) {
-        case "Connect":
-            document.getElementById("Version").innerHTML = JsonResponse["Version"]
-            document.getElementById("Date").innerHTML = JsonResponse["Date"]
-            ID = JsonResponse["ID"]
+    response = JSON.parse(data)
+    data = response["data"];
+    switch (response["action"]) {
+        case "connect":
+            document.getElementById("Version").innerHTML = data["version"]
+            document.getElementById("Date").innerHTML = data["date"]
+            ID = response["id"]
             break;
         case "EndItems":
-            for (h = 0; h < JsonResponse["Itemlist"].length; h++) {
-              JsonItem = JsonResponse["Itemlist"][h]
+            for (h = 0; h < data["itemlist"].length; h++) {
+              JsonItem = data["itemlist"][h]
               //[COLOR xxx][/COLOR]
               var re = /(\[COLOR ([^\]]+)\])(?:.*?)(\[\/COLOR\])/g; 
-              var str = JsonItem["Title"];
+              var str = JsonItem["title"];
               while ((resultado= re.exec(str)) !== null) {
                   if (resultado.index === re.lastIndex) {
                       re.lastIndex++;
                   }
-                  JsonItem["Title"] = JsonItem["Title"].replace(resultado[1],"<span style='color:"+resultado[2]+"'>")
-                  JsonItem["Title"] = JsonItem["Title"].replace(resultado[3],"</span>")
+                  JsonItem["title"] = JsonItem["title"].replace(resultado[1],"<span style='color:"+resultado[2]+"'>")
+                  JsonItem["title"] = JsonItem["title"].replace(resultado[3],"</span>")
               }
               
               //[B][/B]
               var re = /(\[B\])(?:.*?)(\[\/B\])/g; 
-              var str = JsonItem["Title"];
+              var str = JsonItem["title"];
               while ((resultado= re.exec(str)) !== null) {
                   if (resultado.index === re.lastIndex) {
                       re.lastIndex++;
                   }
-                  JsonItem["Title"] = JsonItem["Title"].replace(resultado[1],"<b>")
-                  JsonItem["Title"] = JsonItem["Title"].replace(resultado[2],"</b>")
+                  JsonItem["title"] = JsonItem["title"].replace(resultado[1],"<b>")
+                  JsonItem["title"] = JsonItem["title"].replace(resultado[2],"</b>")
               }
               
               //[i][/i]
               var re = /(\[I\])(?:.*?)(\[\/I\])/g; 
-              var str = JsonItem["Title"];
+              var str = JsonItem["title"];
               while ((resultado= re.exec(str)) !== null) {
                   if (resultado.index === re.lastIndex) {
                       re.lastIndex++;
                   }
-                  JsonItem["Title"] = JsonItem["Title"].replace(resultado[1],"<i>")
-                  JsonItem["Title"] = JsonItem["Title"].replace(resultado[2],"</i>")
+                  JsonItem["title"] = JsonItem["title"].replace(resultado[1],"<i>")
+                  JsonItem["title"] = JsonItem["title"].replace(resultado[2],"</i>")
               }
               //[COLOR xxx][/COLOR]
               var re = /(\[COLOR ([^\]]+)\])(?:.*?)(\[\/COLOR\])/g; 
-              var str = JsonItem["Plot"];
+              var str = JsonItem["plot"];
               while ((resultado= re.exec(str)) !== null) {
                   if (resultado.index === re.lastIndex) {
                       re.lastIndex++;
                   }
-                  JsonItem["Plot"] = JsonItem["Plot"].replace(resultado[1],"<span style='color:"+resultado[2]+"'>")
-                  JsonItem["Plot"] = JsonItem["Plot"].replace(resultado[3],"</span>")
+                  JsonItem["plot"] = JsonItem["plot"].replace(resultado[1],"<span style='color:"+resultado[2]+"'>")
+                  JsonItem["plot"] = JsonItem["plot"].replace(resultado[3],"</span>")
               }
               
               //[B][/B]
               var re = /(\[B\])(?:.*?)(\[\/B\])/g; 
-              var str = JsonItem["Plot"];
+              var str = JsonItem["plot"];
               while ((resultado= re.exec(str)) !== null) {
                   if (resultado.index === re.lastIndex) {
                       re.lastIndex++;
                   }
-                  JsonItem["Plot"] = JsonItem["Plot"].replace(resultado[1],"<b>")
-                  JsonItem["Plot"] = JsonItem["Plot"].replace(resultado[2],"</b>")
+                  JsonItem["plot"] = JsonItem["plot"].replace(resultado[1],"<b>")
+                  JsonItem["plot"] = JsonItem["plot"].replace(resultado[2],"</b>")
               }
               
               //[i][/i]
               var re = /(\[I\])(?:.*?)(\[\/I\])/g; 
-              var str = JsonItem["Plot"];
+              var str = JsonItem["plot"];
               while ((resultado= re.exec(str)) !== null) {
                   if (resultado.index === re.lastIndex) {
                       re.lastIndex++;
                   }
-                  JsonItem["Plot"] = JsonItem["Plot"].replace(resultado[1],"<i>")
-                  JsonItem["Plot"] = JsonItem["Plot"].replace(resultado[2],"</i>")
+                  JsonItem["plot"] = JsonItem["plot"].replace(resultado[1],"<i>")
+                  JsonItem["plot"] = JsonItem["plot"].replace(resultado[2],"</i>")
               }
-              if (JsonItem["ItemAction"]=="go_back"){
+              
+              if (JsonItem["action"]=="go_back"){
                 Action = 'Back()'
               }else{
-                Action = 'DescargarContenido(\''+ JsonItem["Url"] +'\')'
+                Action = 'DescargarContenido(\''+ JsonItem["url"] +'\')'
               }
-              if (JsonItem["Thumbnail"].indexOf("http") != 0){JsonItem["Thumbnail"] = JsonItem["Host"] +"/local-"+encodeURIComponent(btoa(JsonItem["Thumbnail"]))}
-              if (JsonItem["Mode"]==0){
-                HtmlItem ='<li class="ListItemBanner"><a onblur="" onfocus="ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem"></p></a>{$BotonMenu}</li>'
-              }else if (JsonItem["Mode"]==1){
-                HtmlItem ='<li class="ListItemChannels"><a onblur="DesCargarInfo(this)" onfocus="ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><h3 class="ListItem">' + JsonItem["Title"] + '</h3><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"></div></a>{$BotonMenu}</li>'
+              if (JsonItem["thumbnail"].indexOf("http") != 0){JsonItem["thumbnail"] = data["host"] +"/local-"+encodeURIComponent(btoa(JsonItem["thumbnail"]))}
+              if (data["mode"]==0){
+                HtmlItem ='<li class="ListItemBanner"><a onblur="" onfocus="ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+data["host"]+'" src="'+JsonItem["thumbnail"]+'"></div><h3 class="ListItem">' + JsonItem["title"] + '</h3><p class="ListItem"></p></a>{$BotonMenu}</li>'
+              }else if (data["mode"]==1){
+                HtmlItem ='<li class="ListItemChannels"><a onblur="DesCargarInfo(this)" onfocus="ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><h3 class="ListItem">' + JsonItem["title"] + '</h3><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+data["host"]+'" src="'+JsonItem["thumbnail"]+'"></div></a>{$BotonMenu}</li>'
              
-              }else if (JsonItem["Mode"]==2){
-                if (JsonItem["ItemAction"]=="go_back" || JsonItem["ItemAction"]=="search" || JsonItem["Thumbnail"].indexOf("thumb_folder") != -1 || JsonItem["Thumbnail"].indexOf("thumb_nofolder") != -1 || JsonItem["Thumbnail"].indexOf("thumb_error") != -1){
-                  HtmlItem ='<li class="ListItem"><a onfocus="DesCargarInfo(this);ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem">' + JsonItem["Plot"] + '</p></a>{$BotonMenu}</li>'
+              }else if (data["mode"]==2){
+                if (JsonItem["action"]=="go_back" || JsonItem["action"]=="search" || JsonItem["thumbnail"].indexOf("thumb_folder") != -1 || JsonItem["thumbnail"].indexOf("thumb_nofolder") != -1 || JsonItem["thumbnail"].indexOf("thumb_error") != -1){
+                  HtmlItem ='<li class="ListItem"><a onfocus="DesCargarInfo(this);ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+data["host"]+'" src="'+JsonItem["thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["title"] + '</h3><p class="ListItem">' + JsonItem["plot"] + '</p></a>{$BotonMenu}</li>'
                 }else{
-                  HtmlItem ='<li class="ListItem"><a onblur="DesCargarInfo(this)" onfocus="CargarInfo(this);ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+JsonItem["Host"]+'" src="'+JsonItem["Thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["Title"] + '</h3><p class="ListItem">' + JsonItem["Plot"] + '</p></a>{$BotonMenu}</li>'
+                  HtmlItem ='<li class="ListItem"><a onblur="DesCargarInfo(this)" onfocus="CargarInfo(this);ItemFocus=this" onmouseover="this.focus()" class="ListItem {$ClassMenu}" href="javascript:void(0)" onclick="ItemFocus=this;'+Action+'"><div class="ListItem"><img class="ListItem" onerror="ImgError(this)" alt="'+data["host"]+'" src="'+JsonItem["thumbnail"]+'"><img class="Default" src="http://pelisalacarta.mimediacenter.info/squares/folder.png"></div><h3 class="ListItem">' + JsonItem["title"] + '</h3><p class="ListItem">' + JsonItem["plot"] + '</p></a>{$BotonMenu}</li>'
                 }
               }
               Lista = "";
-              for (x = 0; x < JsonItem["ContextMenu"]["Count"]; x++) {
+              for (x = 0; x < JsonItem["context"].length; x++) {
                 Lista +=
-                '<li class="Lista"><a href="javascript:void(0)" onmouseover="this.focus()" onclick="CerrarDialogos();DescargarContenido(\'' + JsonItem["ContextMenu"]["Url" + x] +
-                '\')" class="Lista"><h3>' + JsonItem["ContextMenu"]["Title" + x] + '</h3></a></li>';
+                '<li class="Lista"><a href="javascript:void(0)" onmouseover="this.focus()" onclick="CerrarDialogos();DescargarContenido(\'' + ["context"][x]["url"] +
+                '\')" class="Lista"><h3>' + JsonItem["context"][x]["title"] + '</h3></a></li>';
               }
               BotonMenu = '<a class="ListItemButton" href="javascript:void(0)" onmouseover="this.focus()" onclick=\'ItemFocus=this;AbrirMenu("Menu","'+btoa(Lista)+'")\'></a>';
               ClassMenu = "ListItemMenu"
-              if (JsonItem["ContextMenu"]["Count"] === 0) {
+              if (JsonItem["context"].length === 0) {
                   BotonMenu = "";
                   ClassMenu = "";
               }
@@ -979,9 +989,8 @@ function GetResponses(data) {
             }
             
             
-            ActualizarNavegacion()
-            
-            EnviarDatos(true);
+            ActualizarNavegacion()           
+            EnviarDatos({"id":response["id"], "result":true });
             CerrarLoading()
             break;
         case "Refresh":
@@ -989,80 +998,79 @@ function GetResponses(data) {
             Navegacion[Navegacion.length - 1].Scroll = document.getElementById("Contenedor").scrollTop;
             Navegacion[Navegacion.length - 1].Focus  = Array.prototype.indexOf.call(document.getElementById("itemlist").children, ItemFocus.parentNode);
             DescargarContenido(Consulta);
-            EnviarDatos(true);
+            EnviarDatos({"id":response["id"], "result":true });
             break;
         case "Alert":
             CerrarLoading()
-            AbrirAlert(JsonResponse["Title"],JsonResponse["Text"].replace(new RegExp("\n", 'g'), "<br/>"))
+            AbrirAlert(response["id"],data)
             break;
         case "AlertYesNo":
             CerrarLoading()
-            AbrirAlertYesNo(JsonResponse["Title"],JsonResponse["Text"].replace(new RegExp("\n", 'g'), "<br/>"))
+            AbrirAlertYesNo(response["id"],data)
             break;
         case "ProgressBG":
-            AbrirProgressBG(JsonResponse["Title"],JsonResponse["Text"],JsonResponse["Progress"])
-            EnviarDatos(true);
+            AbrirProgressBG(response["id"],data)
+            EnviarDatos({"id":response["id"], "result":true });
             break;
         case "ProgressBGUpdate":
-            UpdateProgressBG(JsonResponse["Title"],JsonResponse["Text"],JsonResponse["Progress"])
+            UpdateProgressBG(response["id"],data)
             break;
         case "ProgressBGClose":
             CerrarProgressBG();
-            EnviarDatos(true);
+            EnviarDatos({"id":response["id"], "result":true });
             break;
         case "Progress":
             CerrarLoading()
-            AbrirProgress(JsonResponse["Title"],JsonResponse["Text"].replace(new RegExp("\n", 'g'), "<br/>"),JsonResponse["Progress"])
-            EnviarDatos(true);
-            break;
-        case "ProgressIsCanceled":
-            EnviarDatos(document.getElementById("ProgressBar-Cancelled").checked !="");
-            break;
-        case "isPlaying":
-            EnviarDatos(document.getElementById("Player-popup").style.display=="block" || document.getElementById("Lista-popup").style.display=="block");
+            AbrirProgress(response["id"],data)
+            EnviarDatos({"id":response["id"], "result":true });
             break;
         case "ProgressUpdate":
-            UpdateProgress(JsonResponse["Title"],JsonResponse["Text"].replace(new RegExp("\n", 'g'), "<br/>"),JsonResponse["Progress"])
+            UpdateProgress(response["id"],data)
             break;
         case "ProgressClose":
             CerrarProgress();
-            EnviarDatos(true);
+            EnviarDatos({"id":response["id"], "result":true });
             CerrarLoading()
+            break;
+        case "ProgressIsCanceled":
+            EnviarDatos({"id":response["id"], "result":document.getElementById("ProgressBar-Cancelled").checked !="" });
+            break;
+        case "isPlaying":
+            EnviarDatos({"id":response["id"], "result": document.getElementById("Player-popup").style.display=="block" || document.getElementById("Lista-popup").style.display=="block"});
             break;
         case "Keyboard":
             CerrarLoading()
-            AbrirKeyboard(JsonResponse["Title"], JsonResponse["Text"], JsonResponse["Password"]);
+            AbrirKeyboard(response["id"],data);
             break;
         case "List":
             CerrarLoading()
             Lista = "";
-            for (x = 0; x < JsonResponse["List"]["Count"]; x++) {
+            for (x = 0; x < data["list"].length; x++) {
                 Lista +=
-                    '<li class="Lista"><a href="javascript:void(0)" onmouseover="this.focus()" onclick="CerrarDialogos();EnviarDatos(\'' + x +
-                    '\')" class="Lista"><h3>' + JsonResponse["List"]["Title" + x] + '</h3></a></li>';
+                    '<li class="Lista"><a href="javascript:void(0)" onmouseover="this.focus()" onclick="CerrarDialogos();EnviarDatos({\'id\':\''+response["id"]+'\', \'result\':'+x+' })" class="Lista"><h3>' + data["list"][x] + '</h3></a></li>';
             }
-            AbrirLista(JsonResponse["Title"],Lista)
+            AbrirLista(response["id"],data,Lista)
             break;
         case "Play":
-            EnviarDatos(true);
+            EnviarDatos({"id":response["id"], "result":true });
             CerrarLoading()
-            if(!new RegExp("^(.+://)").test(JsonResponse["Url"])){
-             JsonResponse["Url"] = JsonResponse["Host"]+"/local-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"}
+            if(!new RegExp("^(.+://)").test(data["video_url"])){
+             JsonResponse["Url"] = data["host"]+"/local-"+encodeURIComponent(btoa(Utf8.encode(data["video_url"])))+".mp4"}
              
-            else if(new RegExp("^(?:http\://.*?\.vkcache\.com)").test(JsonResponse["Url"])){
+            else if(new RegExp("^(?:http\://.*?\.vkcache\.com)").test(data["video_url"])){
             
-             JsonResponse["Url"] = JsonResponse["Host"]+"/netutv-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"} 
+             JsonResponse["Url"] = data["host"]+"/netutv-"+encodeURIComponent(btoa(Utf8.encode(data["video_url"])))+".mp4"} 
             
-            ProxyUrl = JsonResponse["Host"]+"/remote-"+encodeURIComponent(btoa(Utf8.encode(JsonResponse["Url"])))+".mp4"
-            Lista  = '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play(\''+JsonResponse["Url"]+'\',\''+btoa(JsonResponse["Title"])+'\')" class="Lista"><h3>Abrir Enlace</h3></a></li>';
-            Lista += '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play_VLC(\''+JsonResponse["Url"]+'\',\''+btoa(JsonResponse["Title"])+'\')" class="Lista"><h3>Plugin VLC</h3></a></li>';
-            Lista += '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play_HTML(\''+ProxyUrl+'\',\''+btoa(JsonResponse["Title"])+'\')" class="Lista"><h3>Video HTML</h3></a></li>';
-            AbrirLista("Elige el Reproductor",Lista)
+            ProxyUrl = data["host"]+"/remote-"+encodeURIComponent(btoa(Utf8.encode(data["video_url"])))+".mp4"
+            Lista  = '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play(\''+data["video_url"]+'\',\''+btoa(data["title"])+'\')" class="Lista"><h3>Abrir Enlace</h3></a></li>';
+            Lista += '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play_VLC(\''+data["video_url"]+'\',\''+btoa(data["title"])+'\')" class="Lista"><h3>Plugin VLC</h3></a></li>';
+            Lista += '<li onmouseover="this.focus()" class="Lista"><a href="#" onmouseover="this.focus()" onclick="CerrarDialogos();Play_HTML(\''+data["video_url"]+'\',\''+btoa(data["title"])+'\')" class="Lista"><h3>Video HTML</h3></a></li>';
 
+            AbrirLista("",{"title": "Elige el Reproductor"},Lista)
+            EnviarDatos({"id":response["id"], "result":true });
             break;
         case "Update":
-            DescargarContenido(JsonResponse["Url"]);
-            EnviarDatos(true);
+            DescargarContenido(data["url"]);
             CerrarLoading()
             break;
         case "HideLoading":
@@ -1071,58 +1079,90 @@ function GetResponses(data) {
         case "OpenConfig":
             CerrarLoading()
             Opciones = {};
-            for (x = 0; x < JsonResponse["Options"]["Count"]; x++) {
-                if (typeof(Opciones[JsonResponse["Options"]["Category" + x]]) == 'undefined') {
-                    Opciones[JsonResponse["Options"]["Category" + x]] = "";
+            for (x = 0; x < data["items"].length; x++) {
+                if (typeof(Opciones[data["items"][x]["category"]]) == 'undefined') {
+                    Opciones[data["items"][x]["category"]] = "";
                 }
-                switch (JsonResponse["Options"]["Type" + x]) {
+                switch (data["items"][x]["type"]) {
                     case "sep":
-                        Opciones[JsonResponse["Options"]["Category" + x]] +=
+                        Opciones[data["items"][x]["category"]] +=
                             '<li class="ListItem"><div class="Separador"></div></li>';
                         break;
+                    case "lsep":
+                        Opciones[data["items"][x]["category"]] +=
+                            '<li class="ListItem"><div class="LabelSeparador">' + data["items"][x]["label"] + '</div></li>';
+                        break;
                     case "text":
-                        if (JsonResponse["Options"]["Option" + x] == "hidden") {
-                            Opciones[JsonResponse["Options"]["Category" + x]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + JsonResponse["Options"]["Label" + x] + '</h3><span class="Control"><div class="Text"><input class="Text" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="password" id="' + JsonResponse["Options"]["Id" + x] + '" value="' + JsonResponse["Options"]["Value" + x] + '"></div></span</div></li>';
+                        if (data["items"][x]["option"] == "hidden") {
+                            Opciones[data["items"][x]["category"]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + data["items"][x]["label"] + '</h3><span class="Control"><div class="Text"><input class="Text" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="password" id="' + data["items"][x]["id"] + '" value="' + data["items"][x]["value"] + '"></div></span</div></li>';
                         } else {
-                            Opciones[JsonResponse["Options"]["Category" + x]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + JsonResponse["Options"]["Label" + x] + '</h3><span class="Control"><div class="Text"><input class="Text" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="text" id="' + JsonResponse["Options"]["Id" + x] + '" value="' + JsonResponse["Options"]["Value" + x] + '"></div></span</div></li>';
+                            Opciones[data["items"][x]["category"]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + data["items"][x]["label"] + '</h3><span class="Control"><div class="Text"><input class="Text" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="text" id="' + data["items"][x]["id"] + '" value="' + data["items"][x]["value"] + '"></div></span</div></li>';
                         }
                         break;
                     case "bool":
-                        if (JsonResponse["Options"]["Value" + x] == "true") {
-                            Opciones[JsonResponse["Options"]["Category" + x]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + JsonResponse["Options"]["Label" + x] + '</h3><span class="Control"><div class="Check"><input class="Check" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="checkbox" checked=checked id="' + JsonResponse["Options"]["Id" + x] + '" value="' + JsonResponse["Options"]["Value" + x] + '"></div></span</div></li>';
+                        if (data["items"][x]["value"] == "true") {
+                            Opciones[data["items"][x]["category"]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + data["items"][x]["label"] + '</h3><span class="Control"><div class="Check"><input class="Check" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="checkbox" checked=checked id="' + data["items"][x]["id"] + '" value="' + data["items"][x]["value"] + '"></div></span</div></li>';
                         } else {
-                            Opciones[JsonResponse["Options"]["Category" + x]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + JsonResponse["Options"]["Label" + x] + '</h3><span class="Control"><div class="Check"><input class="Check" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="checkbox" id="' + JsonResponse["Options"]["Id" + x] + '" value="' + JsonResponse["Options"]["Value" + x] + '"></div></span</div></li>';
+                            Opciones[data["items"][x]["category"]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + data["items"][x]["label"] + '</h3><span class="Control"><div class="Check"><input class="Check" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="checkbox" id="' + data["items"][x]["id"] + '" value="' + data["items"][x]["value"] + '"></div></span</div></li>';
                         }
                         break;
+                    case "labelenum":
+                        if (data["items"][x]["values"] === "" || typeof(data["items"][x]["values"]) === "undefined") {
+                            Opcion = data["items"][x]["lvalues"].split("|");
+                        } else {
+                            Opcion = data["items"][x]["values"].split("|");
+                        }
+                        SOpciones = "";
+                        for (y = 0; y < Opcion.length; y++) {
+                            if (data["items"][x]["value"] == Opcion[y]) {
+                                if (data["items"][x]["lvalues"] === "") {
+                                    SOpciones += "<option selected=selected>" + data["items"][x]["values"].split("|")[y] +
+                                        "</option>";
+                                } else {
+                                    SOpciones += "<option selected=selected>" + data["items"][x]["lvalues"].split("|")[y] +
+                                        "</option>";
+                                }
+                            } else {
+                                if (data["items"][x]["lvalues"] === "") {
+                                    SOpciones += "<option>" + data["items"][x]["values"].split("|")[y] +
+                                        "</option>";
+                                } else {
+                                    SOpciones += "<option>" + data["items"][x]["lvalues"].split("|")[y] + "</option>";
+                                }
+                            }
+                        }
+                        Opciones[data["items"][x]["category"]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + data["items"][x]["label"] + '</h3><span class="Control"><div class="Select"><select class="Select" name="labelenum" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" id="' + data["items"][x]["id"] + '">' + SOpciones + '</select></div></span</div></li>';
+                        break;
                     case "enum":
-                        if (JsonResponse["Options"]["Values" + x] === "") {
-                            Opcion = JsonResponse["Options"]["Lvalues" + x].split("|");
+                    
+                        if (data["items"][x]["lvalues"] === "" || typeof(data["items"][x]["lvalues"]) === "undefined") {
+                            Opcion = data["items"][x]["values"].split("|");
                             for (y = 0; y < Opcion.length; y++) {
                                 Opcion[y] = y;
                             }
                         } else {
-                            Opcion = JsonResponse["Options"]["Values" + x].split("|");
+                            Opcion = data["items"][x]["values"].split("|");
                         }
                         SOpciones = "";
                         for (y = 0; y < Opcion.length; y++) {
-                            if (JsonResponse["Options"]["Value" + x] == Opcion[y]) {
-                                if (JsonResponse["Options"]["Lvalues" + x] === "") {
-                                    SOpciones += "<option selected=selected>" + JsonResponse["Options"]["Values" + x].split("|")[y] +
+                            if (data["items"][x]["value"] == Opcion[y]) {
+                                if (data["items"][x]["lvalues"] === "" || typeof(data["items"][x]["lvalues"]) === "undefined") {
+                                    SOpciones += "<option selected=selected>" + data["items"][x]["values"].split("|")[y] +
                                         "</option>";
                                 } else {
-                                    SOpciones += "<option selected=selected>" + JsonResponse["Options"]["Lvalues" + x].split("|")[y] +
+                                    SOpciones += "<option selected=selected>" + data["items"][x]["lvalues"].split("|")[y] +
                                         "</option>";
                                 }
                             } else {
-                                if (JsonResponse["Options"]["Lvalues" + x] === "") {
-                                    SOpciones += "<option>" + JsonResponse["Options"]["Values" + x].split("|")[y] +
+                                if (data["items"][x]["lvalues"] === "" || typeof(data["items"][x]["lvalues"]) === "undefined") {
+                                    SOpciones += "<option>" + data["items"][x]["values"].split("|")[y] +
                                         "</option>";
                                 } else {
-                                    SOpciones += "<option>" + JsonResponse["Options"]["Lvalues" + x].split("|")[y] + "</option>";
+                                    SOpciones += "<option>" + data["items"][x]["lvalues"].split("|")[y] + "</option>";
                                 }
                             }
                         }
-                        Opciones[JsonResponse["Options"]["Category" + x]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + JsonResponse["Options"]["Label" + x] + '</h3><span class="Control"><div class="Select"><select class="Select" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" id="' + JsonResponse["Options"]["Id" + x] + '">' + SOpciones + '</select></div></span</div></li>';
+                        Opciones[data["items"][x]["category"]] += '<li class="ListItem"><div class="ListItem"><h3 class="Ajuste">' + data["items"][x]["label"] + '</h3><span class="Control"><div class="Select"><select class="Select" name="enum" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" id="' + data["items"][x]["id"] + '">' + SOpciones + '</select></div></span</div></li>';
                         break;
                     default:
                         break;
@@ -1138,7 +1178,7 @@ function GetResponses(data) {
                         '<ul class="ListItem" style="display:none" id="Config-' + key + '">' + Opciones[key] + '</ul>';
                 }
             }
-            AbrirConfig(Secciones,Lista)
+            AbrirConfig(response["id"],data, Secciones, Lista)
 
             break;
 
@@ -1252,13 +1292,17 @@ function GuardarConfig(Guardar) {
         for(x=0;x<Objetos.length;x++){
           switch (Objetos[x].type) {
                 case "select-one":
-                    JsonAjustes[Objetos[x].id] = Objetos[x].selectedIndex.toString();
+                    if (Objetos[x].name == "enum"){
+                      JsonAjustes[Objetos[x].id] = Objetos[x].selectedIndex.toString();
+                    } else if (Objetos[x].name == "labelenum"){
+                      JsonAjustes[Objetos[x].id] = Objetos[x].value;
+                    }
                     break;
             }
         }
-        EnviarDatos(JSON.stringify(JsonAjustes));
+        EnviarDatos({"id":document.getElementById("Config-popup").RequestID, "result":JsonAjustes });
     } else {
-        EnviarDatos("-1");
+        EnviarDatos({"id":document.getElementById("Config-popup").RequestID, "result":false });
     }
     
     AbrirLoading()
@@ -1271,13 +1315,13 @@ function DescargarContenido(url) {
     UltimoRequest = url;
     UltimoRequestTime = new Date().getTime();
     Send = {}
-    Send["Request"] = url
+    Send["request"] = url
     WebSocketSend(Send);
 }
 
 function EnviarDatos(dato) {
     Send = {}
-    Send["Data"] = dato
+    Send["data"] = dato
     WebSocketSend(Send)
 }
 
