@@ -12,10 +12,10 @@ __title__ = "Pordede"
 __fanart__ = ""
 __type__ = "generic"
 __disabled__ = False
-__version__ = 6
+__version__ = 7
 __adult__ = False
 __date__ = "22/04/2015"
-__creationdate__ = "15/06/2014"
+__creationdate__ = "03/02/2016"
 __changes__ = "Arreglo de siguientes capítulos"
 __thumbnail__ = ""
 __channel__ = "pordede"
@@ -64,7 +64,8 @@ def mainlist(item):
     return itemlist
 
 def openconfig(item):
-    config.open_settings( )
+    if "xbmc" in config.get_platform() or "boxee" in config.get_platform():
+        config.open_settings( )
     return []
 
 def menuseries(item):
@@ -165,7 +166,7 @@ def buscar(item):
 
 def parse_mixed_results(item,data):
     patron  = '<a class="defaultLink extended" href="([^"]+)"[^<]+'
-    patron += '<div class="coverMini shadow tiptip" title="([^"]+)"[^<]+'
+    patron += '<div class="coverMini     shadow tiptip" title="([^"]+)"[^<]+'
     patron += '<img class="centeredPic.*?src="([^"]+)"'
     patron += '[^<]+<img[^<]+<div class="extra-info">'
     patron += '<span class="year">([^<]+)</span>'
@@ -196,7 +197,7 @@ def parse_mixed_results(item,data):
 
     if "offset/" in item.url:
         old_offset = scrapertools.find_single_match(item.url,"offset/(\d+)/")
-        new_offset = int(old_offset)+30
+        new_offset = int(old_offset)+60
         url = item.url.replace("offset/"+old_offset,"offset/"+str(new_offset))
         itemlist.append( Item(channel=__channel__, action="lista" , title=">> Página siguiente" , extra=item.extra, url=url))
 
@@ -225,7 +226,7 @@ def siguientes(item):
     if (DEBUG): logger.info("html2="+json_object["html"])
     data = json_object["html"]
     patron = ''
-    patron += '<div class="coverMini shadow tiptip" title="([^"]+)">[^<]+'
+    patron += '<div class="coverMini     shadow tiptip" title="([^"]+)">[^<]+'
     patron += '<img class="centeredPic centeredPicFalse"  onerror="[^"]+"  src="([^"]+)"[^<]+'
     patron += '<img src="/images/loading-mini.gif" class="loader"/>[^<]+'
     patron += '<div class="extra-info"><span class="year">[^<]+'
@@ -350,7 +351,7 @@ def episodios(item):
 
             if (DEBUG): logger.info("title=["+title+"], url=["+url+"], thumbnail=["+thumbnail+"]")
 
-    if config.get_platform().startswith("xbmc") or config.get_platform().startswith("boxee"):
+    if config.get_library_support():
         # con año y valoracion la serie no se puede actualizar correctamente, si ademas cambia la valoracion, creara otra carpeta
         # Sin año y sin valoración:
         show = re.sub(r"\s\(\d+\)\s\(\d+\.\d+\)", "", item.show)
@@ -463,6 +464,9 @@ def findvideos(item, verTodos=False):
     matches = re.compile(patron,re.DOTALL).findall(data)
     itemlist = []
 
+    if config.get_platform().startswith("xbmc") and "/what/peli" in item.url:
+        itemlist.append( Item(channel=__channel__, action="infosinopsis" , title="INFO / SINOPSIS" , url=item.url, thumbnail=item.thumbnail,  folder=False ))
+
     itemsort = []
     sortlinks = config.get_setting("pordedesortlinks") # 0:no, 1:valoracion, 2:idioma, 3:calidad, 4:idioma+calidad, 5:idioma+valoracion, 6:idioma+calidad+valoracion
     sortlinks = int(sortlinks) if sortlinks != '' else 0
@@ -561,7 +565,7 @@ def play(item):
     data = scrapertools.cache_page(item.url,post="_s="+item.extra.split("|")[0],headers=headers)
     if (DEBUG): logger.info("data="+data)
     #url = scrapertools.find_single_match(data,'<a href="([^"]+)" target="_blank"><button>Visitar enlace</button>')
-    url = scrapertools.find_single_match(data,'<p class="links">\s+<a href="([^"]+)" target="_blank"')
+    url = scrapertools.find_single_match(data,'<p class="nicetry links">\s+<a href="([^"]+)" target="_blank"')
     url = urlparse.urljoin(item.url,url)
 
     headers = DEFAULT_HEADERS[:]
@@ -605,6 +609,71 @@ def checkseen(item):
 
 
     return True
+
+def infosinopsis(item):
+    logger.info("pelisalacarta.channels.pordede infosinopsis")
+
+    url_aux = item.url.replace("/links/view/slug/", "/peli/").replace("/what/peli", "")
+    # Descarga la pagina
+    headers = DEFAULT_HEADERS[:]
+    #headers.append(["Referer",item.extra])
+    #headers.append(["X-Requested-With","XMLHttpRequest"])
+    data = scrapertools.cache_page(url_aux,headers=headers)
+    if (DEBUG): logger.info("data="+data)
+
+    scrapedtitle = scrapertools.find_single_match(data,'<h1>([^<]+)</h1>')
+    scrapedvalue = scrapertools.find_single_match(data,'<span class="puntuationValue" data-value="([^"]+)"')
+    scrapedyear = scrapertools.find_single_match(data,'<h2 class="info">[^<]+</h2>\s*<p class="info">([^<]+)</p>')
+    scrapedduration = scrapertools.find_single_match(data,'<h2 class="info">[^<]+</h2>\s*<p class="info">([^<]+)</p>', 1)
+    scrapedplot = scrapertools.find_single_match(data,'<div class="info text"[^>]+>([^<]+)</div>')
+    #scrapedthumbnail = scrapertools.find_single_match(data,'<meta property="og:image" content="([^"]+)"')
+    #thumbnail = scrapedthumbnail.replace("http://www.pordede.comhttp://", "http://").replace("mediacover", "mediathumb")
+    scrapedgenres = re.compile('href="/pelis/index/genre/[^"]+">([^<]+)</a>',re.DOTALL).findall(data)
+    scrapedcasting = re.compile('href="/star/[^"]+">([^<]+)</a><br/><span>([^<]+)</span>',re.DOTALL).findall(data)
+
+    title = scrapertools.htmlclean(scrapedtitle)
+    plot = "Año: [B]"+scrapedyear+"[/B]"
+    plot += " , Duración: [B]"+scrapedduration+"[/B]"
+    plot += " , Puntuación usuarios: [B]"+scrapedvalue+"[/B]"
+    plot += "\nGéneros: "+", ".join(scrapedgenres)
+    plot += "\n\nSinopsis:\n"+scrapertools.htmlclean(scrapedplot)
+    plot += "\n\nCasting:\n"
+    for actor,papel in scrapedcasting:
+    	plot += actor+" ("+papel+"). "
+
+    tbd = TextBox("DialogTextViewer.xml", os.getcwd(), "Default")
+    tbd.ask(title, plot)
+    del tbd
+    return
+
+try:
+    import xbmcgui
+    class TextBox( xbmcgui.WindowXML ):
+        """ Create a skinned textbox window """
+        def __init__( self, *args, **kwargs):
+            pass
+            
+        def onInit( self ):
+            try:
+                self.getControl( 5 ).setText( self.text )
+                self.getControl( 1 ).setLabel( self.title )
+            except: pass
+    
+        def onClick( self, controlId ):
+            pass
+    
+        def onFocus( self, controlId ):
+            pass
+    
+        def onAction( self, action ):
+            self.close()
+    
+        def ask(self, title, text ):
+            self.title = title
+            self.text = text
+            self.doModal()
+except:
+    pass
 
 # Valoraciones de enlaces, los valores más altos se mostrarán primero :
 
