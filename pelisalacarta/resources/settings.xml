@@ -5,7 +5,7 @@
     <setting id="updatecheck2" type="bool" label="30001" default="true"/>
     <setting id="updatechannels" type="bool" label="30004" default="true"/>
     <setting id="updatelibrary" type="bool" label="30201" default="true"/>
-    <setting id="enableadultmode" type="bool" label="30002" default="false"/>
+    <setting id="adult_mode" type="bool" label="30002" default="false"/>
     <setting id="debug" type="bool" label="30003" default="false"/>
     <setting id="logger" type="enum" values="pelisalacarta|xbmc" label="Logger a usar" default="0"/>
     <setting id="default_action" type="enum" lvalues="30006|30007|30008|30009" label="30005" default="0"/>

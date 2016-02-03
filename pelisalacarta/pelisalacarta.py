@@ -389,7 +389,7 @@ def RunLauncher(Socket):
   #Para desarrollo, recarga los modulos en cada peticion, para no tener que reiniciar si modificamos un modulo.
   #Reduce el rendiemiento cuando esta activo.
   #Por defecto desactivado, para activar poner 1.
-  if 1:
+  if 0:
     import inspect
     #Recorre los modulos cargados en memoria
     for module in sys.modules.keys():

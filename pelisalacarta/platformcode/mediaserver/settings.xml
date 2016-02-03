@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <settings>
   <category label="General">
-    <setting default="8080" id="server.port" label="Puerto HTTP" type="text"/>
-    <setting default="8081" id="websocket.port" label="Puerto WebSocket" type="text"/>
+    <setting default="8888" id="server.port" label="Puerto HTTP" type="text"/>
+    <setting default="8889" id="websocket.port" label="Puerto WebSocket" type="text"/>
     <setting type="sep"/>
     <setting default="true" id="updatecheck2" label="Comprobar actualizaciones" type="bool"/>
     <setting default="true" id="updatechannels" label="Actualizar automaticamente" type="bool"/>
@@ -10,7 +10,8 @@
     <setting default="false" id="updatelibrary" label="Actualizar Biblioteca al iniciar" type="bool"/>
     <setting default="0" id="default_action" label="Accion por defecto" lvalues="Preguntar|Ver|Ver en calidad alta|Enviar a Jdownloader" type="enum" values="0|1|2|3"/>
     <setting default="2" id="cache.mode" label="Modo Cache" lvalues="Automatico|Cachear todo|No chachear nada" type="enum" values="0|1|2"/>
-    <setting default="0" id="languagefilter" label="Filtro de Idioma" lvalues="Cualquier idioma|Español|Ingles|Italiano|Portuges|Catalan|Euskera|Gallego|Valenciano" type="enum" values="0|1|2|3|4|5|6|7|8"/>
+    <setting default="0" id="channel_language" label="Filtro de Idioma" lvalues="all|es|en|it" type="enum" values="all|es|en|it"/>
+
     <setting type="sep"/>
     <setting default="false" id="pyload_enabled" label="Activar pyLoad" type="bool"/>
     <setting default="http://localhost:8000" id="pyload" label="Servidor pyLoad" type="text"/>
@@ -140,7 +141,7 @@
     <setting default="10" id="porcentaje_torrent" label="Porcentaje de inicio de torrents" type="text"/>
 	</category>
   <category label="Visualización">
-    <setting default="false" id="enableadultmode" label="Mostrar contenido para adultos" type="bool"/>
+    <setting default="false" id="adult_mode" label="Mostrar contenido para adultos" type="bool"/>
     <setting default="false" id="hidepremium" label="Ocultar Servidores premium sin cuenta" type="bool"/>
     <setting default="2" id="thumbnail_type" label="Modo de thumbnails" lvalues="Poster|Banner|Cuadrado" type="enum" values="0|1|2"/>
     <setting default="10" id="limite_busquedas" label="Numero de Busquedas a guardar" type="text"/>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <strings>
     <!-- Los id disponibles son de 30000 a 30999 -->
 
@@ -11,7 +11,7 @@
     <string id="30001">Comprobar actualizaciones:</string>
     <string id="30004">Actualizar automáticamente canales:</string>
     <string id="30201">Actualizar la biblioteca al abrir XBMC</string>
-    <string id="30002">Activar modo adultos:</string>
+    <string id="30002">Mostrar canales para adultos</string>
     <string id="30003">Generar log detallado:</string>
     <string id="30043">Forzar el modo de vista:</string>
 
@@ -75,6 +75,13 @@
     <string id="30045">URL/fichero con los vídeos</string>
     <string id="30047">Elementos por página</string>
 
+    <!-- Filtros -->
+    <string id="30068">Filtrar por servidores:</string>
+    <string id="30069">Lista Blanca:</string>
+    <string id="30070">Lista Negra:</string>
+    <string id="30071">Para poner varios servidores utiliza "," como separador</string>
+
+
     <!-- =============================================================== -->
     <!-- De 30050 a 30099: Mensajes informativos - error                 -->
     <!-- =============================================================== -->
@@ -107,18 +114,19 @@
     <string id="30105">Se ha quitado de favoritos</string>
     <string id="30106">Se ha quitado de la lista de descargas</string>
     <string id="30107">Ha pasado de nuevo a la lista de descargas</string>
-    <string id="30108">Se ha añadido a favoritos</string>
-    <string id="30109">Se ha añadido a la lista de descargas</string>
+    <string id="30108">se ha añadido a favoritos</string>
+    <string id="30109">se ha añadido a la lista de descargas</string>
     <string id="30110">Buscar trailer para</string>
     <string id="30111">Reintentar búsqueda de trailer para</string>
     <string id="30112">Introduce el título a buscar</string>
     <string id="30113">Modifica el titulo actual para refinar la búsqueda</string>
     <string id="30114">Trailer no encontrado</string>
     <string id="30115">El Trailer para %s</string>
-    <string id="30116">No se ha podido localizar.</string>
+    <string id="30116">no se ha podido localizar.</string>
     <string id="30117">¿Quieres refinar la búsqueda con el teclado?</string>
     <string id="30135">se ha añadido a la biblioteca</string>
 
+    <string id="30130">Novedades</string>
     <string id="30118">Canales</string>
     <string id="30119">Seleccione una Categoría</string>
     <string id="30120">Seleccione un Idioma</string>
@@ -127,13 +135,12 @@
     <string id="30123">Series</string>
     <string id="30124">Anime</string>
     <string id="30125">Documentales</string>
-    <string id="30126">Música</string>
+    <string id="30126">Adultos</string>
     <string id="30136">Versión original</string>
-    <string id="30127">Servidores</string>
+    <string id="30127">Latino</string>
     <string id="30128">Buscador de Trailers</string>
-    <string id="30129">Nacionales</string>
-    <string id="30130">Autonómicos</string>
-    <string id="30131">Locales</string>
+    <string id="30129">Adultos</string>
+    <string id="30131">Biblioteca</string>
     <string id="30132">Temáticos</string>
     <string id="30133">Internet</string>
     <string id="30134">Los nuevos</string>
@@ -216,6 +223,7 @@
     <string id="30500">Cuentas</string>
     <string id="30501">Rutas</string>
     <string id="30502">Otros</string>
+    <string id="30503">Filtros</string>
     
     <!-- TVShack strings -->
     <string id="30900">TVShack</string>

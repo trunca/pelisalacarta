@@ -177,8 +177,8 @@ def MostrarResultado(itemlist, ParentItem):
 #Funcion especifica para importar el canal:----------->OK
 def ImportarCanal(channel):
   channelmodule=""
-  if os.path.exists(os.path.join( config.get_runtime_path(),"pelisalacarta","channels",channel+".py")):
-    exec "from pelisalacarta.channels import "+channel+" as channelmodule"
+  if os.path.exists(os.path.join( config.get_runtime_path(),"channels",channel+".py")):
+    exec "from channels import "+channel+" as channelmodule"
   elif os.path.exists(os.path.join( config.get_runtime_path(),"pelisalacarta",channel+".py")):
     exec "from pelisalacarta import "+channel+" as channelmodule"
   elif os.path.exists(os.path.join( config.get_runtime_path(),"core",channel+".py")):

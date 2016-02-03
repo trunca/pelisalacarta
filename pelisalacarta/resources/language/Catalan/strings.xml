@@ -117,8 +117,9 @@
 	<string id="30115">El tràiler per a %s</string>
 	<string id="30116">no s'ha pogut localitzar.</string>
 	<string id="30117">vols refinar la cerca amb el teclat?</string>
-    	<string id="30135">s'ha afegit a la biblioteca</string>
+	<string id="30135">s'ha afegit a la biblioteca</string>
 
+    <string id="30130">Novetats</string>
     <string id="30118">Canals</string>
     <string id="30119">Selecciona una Categoria</string>
     <string id="30120">Selecciona un Idioma</string>
@@ -127,12 +128,11 @@
     <string id="30123">Sèries</string>
     <string id="30124">Anime</string>
     <string id="30125">Documentals</string>
-    <string id="30126">Música</string>
-    <string id="30127">Servidors</string>
+    <string id="30126">Adults</string>
+    <string id="30127">Llatí</string>
     <string id="30128">Cerca de tràilers</string>
-    <string id="30129">Nacionals</string>
-    <string id="30130">Autonòmics</string>
-    <string id="30131">Locals</string>
+    <string id="30129">Adult</string>
+    <string id="30131">Biblioteca</string>
     <string id="30132">Temàtics</string>
     <string id="30133">Infantil</string>
     <string id="30134">Els nous</string>

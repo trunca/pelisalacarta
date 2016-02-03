@@ -477,6 +477,10 @@ def find_single_match(data,patron,index=0):
     except:
         return ""
 
+# Parse string and extracts multiple matches using regular expressions
+def find_multiple_matches(text,pattern):
+    return re.findall(pattern,text,re.DOTALL)
+
 def entityunescape(cadena):
     return unescape(cadena)
 
@@ -566,6 +570,8 @@ def entitiesfix(string):
 
 
 def htmlclean(cadena):
+    cadena = re.compile("<!--.*?-->",re.DOTALL).sub("",cadena)
+
     cadena = cadena.replace("<center>","")
     cadena = cadena.replace("</center>","")
     cadena = cadena.replace("<cite>","")
@@ -724,6 +730,8 @@ def slugify(title):
 
     return title
 
+def remove_htmltags(string):
+    return re.sub('<[^<]+?>', '', string)
 
 def remove_show_from_title(title,show):
     #print slugify(title)+" == "+slugify(show)
@@ -751,6 +759,22 @@ def getRandom(str):
     return get_md5(str)
 
 
+def unseo(cadena):
+    if cadena.upper().startswith("VER GRATIS LA PELICULA "):
+        cadena = cadena[23:]
+    elif cadena.upper().startswith("VER GRATIS PELICULA "):
+        cadena = cadena[20:]
+    elif cadena.upper().startswith("VER ONLINE LA PELICULA "):
+        cadena = cadena[23:]
+    elif cadena.upper().startswith("VER GRATIS "):
+        cadena = cadena[11:]
+    elif cadena.upper().startswith("VER ONLINE "):
+        cadena = cadena[11:]
+    elif cadena.upper().startswith("DESCARGA DIRECTA "):
+        cadena = cadena[17:]
+    return cadena
+
+#scrapertools.get_filename_from_url(media_url)[-4:]
 def get_filename_from_url(url):
     
     import urlparse
@@ -763,6 +787,9 @@ def get_filename_from_url(url):
             filename = parsed_url[2]
         else:
             filename = ""
+
+    if "/" in filename:
+        filename = filename.split("/")[-1]
 
     return filename
 

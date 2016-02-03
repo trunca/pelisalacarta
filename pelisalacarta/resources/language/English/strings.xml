@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
     <!-- Available id from 30000 to 30999 -->
 
@@ -75,6 +75,13 @@
     <string id="30045">Video list URL / file</string>
     <string id="30047">Elements per page</string>
 
+    <!-- Filtros -->
+    <string id="30068">Filter by servers:</string>
+    <string id="30069">White List:</string>
+    <string id="30070">Black List:</string>
+    <string id="30071">To add several servers use "," as separator</string>
+
+
     <!-- =============================================================== -->
     <!-- 30050 to 30099: Info / error messages                           -->
     <!-- =============================================================== -->
@@ -120,6 +127,7 @@
     <string id="30117">Do you want to refine the search using the keyboard?</string> <!-- ¿Quieres refinar la búsqueda con el teclado? -->
     <string id="30135">added to the library</string>
 
+    <string id="30130">Recent</string>
     <string id="30118">Channels</string>
     <string id="30119">Choose a Category</string>
     <string id="30120">Choose a Language</string>
@@ -129,12 +137,11 @@
     <string id="30124">Anime</string>
     <string id="30125">Documentaries</string>
     <string id="30136">Original version</string>
-    <string id="30126">Music</string>
-    <string id="30127">Servers</string>
+    <string id="30126">Adult</string>
+    <string id="30127">Latin</string>
     <string id="30128">Search Trailers</string>
-    <string id="30129">Nacionales</string>
-    <string id="30130">Autonómicos</string>
-    <string id="30131">Locales</string>
+    <string id="30129">Adult</string>
+    <string id="30131">Library</string>
     <string id="30132">Temáticos</string>
     <string id="30133">Internet</string>
     <string id="30134">Los nuevos</string>
@@ -214,6 +221,7 @@
     <string id="30500">Login</string>
     <string id="30501">Path</string>
     <string id="30502">Other</string>
+    <string id="30503">Filters</string>
     
     <!-- LetMeWatchThis -->
     <string id="40001">Movies - Just added</string>

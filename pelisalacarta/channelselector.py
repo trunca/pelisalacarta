@@ -1,134 +1,210 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #------------------------------------------------------------
 # pelisalacarta - XBMC Plugin
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 #------------------------------------------------------------
-
-#Propiedades del Canal:
-__version__ = 8
-__adult__ = False
-__date__ = "28/07/2013"
-__changes__ = "Actualizado por cambio en el canal"
-
+import urlparse
 import os
 import sys
+import traceback
+import glob
+
 from core import config
 from core import logger
-from core import updater
 from core.item import Item
-import urlparse
-from core import scrapertools
-import re
+from core import channeltools
 
+DEBUG = True
+CHANNELNAME = "channelselector"
 
-def getmainlist(item):
-    logger.info("[channelselector.py] - getmainlist")
+def getmainlist(item, preferred_thumb=""):
+    logger.info("channelselector.getmainlist")
     itemlist = []
 
-    # Obtiene el idioma, y el literal
-    idioma = config.get_setting("languagefilter")
-    logger.info("[channelselector.py] - getmainlist: Idioma=%s" % idioma)
-    langlistv = [config.get_localized_string(30025),config.get_localized_string(30026),config.get_localized_string(30027),config.get_localized_string(30028),config.get_localized_string(30029)]
-    try:
-        idiomav = langlistv[int(idioma)]
-    except:
-        idiomav = langlistv[0]
-    
     # Añade los canales que forman el menú principal
-    itemlist.append( Item(title=config.get_localized_string(30118)+" ("+idiomav+")" , channel="channelselector" , action="channeltypes", thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"channelselector.png") ) )
-    itemlist.append( Item(title=config.get_localized_string(30103) , channel="buscador" , action="mainlist" , thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"buscador.png")) )
-    itemlist.append( Item(title=config.get_localized_string(30128) , channel="trailertools" , action="mainlist" , thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"trailertools.png")) )
-    itemlist.append( Item(title=config.get_localized_string(30102) , channel="favoritos" , action="mainlist" , thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"favoritos.png")) )
-    if config.get_platform() in ("wiimc","rss") :itemlist.append( Item(title="Wiideoteca (Beta)" , channel="wiideoteca" , action="mainlist", thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"wiideoteca.png")) )
-    if config.get_platform()=="rss":itemlist.append( Item(title="pyLOAD (Beta)" , channel="pyload" , action="mainlist" , thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"pyload.png")) )
-    itemlist.append( Item(title=config.get_localized_string(30101) , channel="descargas" , action="mainlist", thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"descargas.png")) )
-    itemlist.append( Item(title=config.get_localized_string(30100) , channel="configuracion" , action="mainlist", thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"configuracion.png")) )
-    itemlist.append( Item(title=config.get_localized_string(30104) , channel="ayuda" , action="mainlist", thumbnail = urlparse.urljoin(config.get_thumbnail_path(),"ayuda.png")) )
+    itemlist.append( Item(title=config.get_localized_string(30130) , channel="novedades" , action="mainlist", thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_novedades.png") ) )
+    itemlist.append( Item(title=config.get_localized_string(30118) , channel="channelselector" , action="channeltypes", thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_canales.png") ) )
+    itemlist.append( Item(title=config.get_localized_string(30103) , channel="buscador" , action="mainlist" , thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_buscar.png")) )
+    itemlist.append( Item(title=config.get_localized_string(30102) , channel="favoritos" , action="mainlist" , thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_favoritos.png")) )
+    itemlist.append( Item(title=config.get_localized_string(30131) , channel="wiideoteca" , action="mainlist", thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_biblioteca.png")) )
+    itemlist.append( Item(title=config.get_localized_string(30101) , channel="descargas" , action="mainlist", thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_descargas.png")) )
+
+    if "xbmceden" in config.get_platform():
+        itemlist.append( Item(title=config.get_localized_string(30100) , channel="configuracion" , action="mainlist", thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_configuracion.png"), folder=False) )
+    else:
+        itemlist.append( Item(title=config.get_localized_string(30100) , channel="configuracion" , action="mainlist", thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_configuracion.png")) )
+
+    itemlist.append( Item(title=config.get_localized_string(30104) , channel="ayuda" , action="mainlist", thumbnail = urlparse.urljoin(get_thumbnail_path(preferred_thumb),"thumb_ayuda.png")) )
     return itemlist
 
 
-def channeltypes(item):
-    logger.info("[channelselector.py] - channeltypes")
-    itemlist = []
-    itemlist.append( Item( title=config.get_localized_string(30121) , channel="channelselector" , action="listchannels" , category="*"   , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"channelselector")))
-    itemlist.append( Item( title=config.get_localized_string(30122) , channel="channelselector" , action="listchannels" , category="F"   , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"peliculas")))
-    itemlist.append( Item( title=config.get_localized_string(30123) , channel="channelselector" , action="listchannels" , category="S"   , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"series")))
-    itemlist.append( Item( title=config.get_localized_string(30124) , channel="channelselector" , action="listchannels" , category="A"   , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"anime")))
-    itemlist.append( Item( title=config.get_localized_string(30125) , channel="channelselector" , action="listchannels" , category="D"   , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"documentales")))
-    itemlist.append( Item( title=config.get_localized_string(30136) , channel="channelselector" , action="listchannels" , category="VOS" , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"versionoriginal")))
-    itemlist.append( Item( title=config.get_localized_string(30126) , channel="channelselector" , action="listchannels" , category="M"   , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"musica")))
-    itemlist.append( Item( title=config.get_localized_string(30127) , channel="channelselector" , action="listchannels" , category="G"   , thumbnail=urlparse.urljoin(config.get_thumbnail_path(),"servidores")))
-    return itemlist
-    
-def listchannels(item):
-    itemlist = []
-    try:
-        idioma = config.get_setting("languagefilter")
-        logger.info("channelselector.filterchannels idioma=%s" % idioma)
-        langlistv = ["","ES","EN","IT","PT"]
-        idiomav = langlistv[int(idioma)]
-        logger.info("channelselector.filterchannels idiomav=%s" % idiomav)
-    except:
-        idiomav=""
+def channeltypes( item, preferred_thumb=""):
+    logger.info("channelselector getchanneltypes")
 
-    folderchannels =  []
-    disabledchannels =  []
-    channelslist =[]
-    hiddenchannels = ["__init__.py","ayuda.py"]
-    
-    for channel in os.listdir(os.path.join(config.get_runtime_path(),"pelisalacarta","channels")):
-      if channel.endswith(".py") and not channel in  hiddenchannels:
+    # Lista de categorias
+    valid_types = [ "movie","serie","anime","documentary","vos","torrent","latino","adult"]
 
-          f = open(os.path.join(config.get_runtime_path(),"pelisalacarta","channels",channel),"r")
-          txt = f.read(1024)
-          f.close()
-          patron = '(__([^_]+)__[ ]*=[ ]*["]*[\']*([^"\r\n]*)["]*[\']*[\r]*[\n]*)'
-          matches = re.compile(patron,re.DOTALL).findall(txt)
-          Propiedades = {}
-          for Todo, key, valor in matches:
+    # Lee la lista de canales
+    channel_path = os.path.join( config.get_runtime_path() , "channels" , '*.xml' )
+    logger.info("channelselector.getchanneltypes channel_path="+channel_path)
+
+    channel_files = glob.glob(channel_path)
+    languages = ["all","es","en","it"]
+    channel_language = languages[int(config.get_setting("channel_language"))]
+    logger.info("channelselector.getchanneltypes channel_language="+channel_language)
+
+    # Construye la lista de tipos
+    channel_types = []
+
+    for index, channel in enumerate(channel_files):
+        logger.info("channelselector.getchanneltypes channel="+channel)
+        if channel.endswith(".xml"):
             try:
-              Propiedades[key] =  int(valor)
+                channel_parameters = channeltools.get_channel_parameters(channel[:-4])
+                logger.info("channelselector.filterchannels channel_parameters="+repr(channel_parameters))
+
+                # Si es un canal para adultos y el modo adulto está desactivado, se lo salta
+                if channel_parameters["adult"]=="true" and config.get_setting("adult_mode")=="false":
+                    continue
+
+                # Si el canal está en un idioma filtrado
+                if channel_language!="all" and channel_parameters["language"]!=channel_language:
+                    continue
+                print channel
+                categories = channel_parameters["categories"]
+                for category in categories:
+                    logger.info("channelselector.filterchannels category="+category)
+                    if category not in channel_types and category in valid_types:
+                        channel_types.append(category)
+
             except:
-              if valor == "True":
-                Propiedades[key] =  True
-              elif valor == "False":
-                Propiedades[key] =  False
-              else:
-                Propiedades[key] =  valor
+                logger.info("Se ha producido un error al leer los datos del canal " + channel + traceback.format_exc())
 
-          
-          #Filtro canales desactivados
-          if not Propiedades["disabled"]:
-            #Filtro Canales adultos
-            if (Propiedades["adult"] and (config.get_setting("enableadultmode") == "true")) or not Propiedades["adult"]:
-            #Filtro Categoria
-              if item.category=="*" or item.category in Propiedades["category"]:
-                #Filtro Idioma
-                if Propiedades["language"]=="" or idiomav=="" or idiomav in Propiedades["language"]:
-                  #Canal TengoUrl al principio de trodo
-                  if Propiedades["channel"]=="tengourl":
-                    channelslist.append(Item(title=Propiedades["title"], channel=Propiedades["channel"],action="mainlist", thumbnail=Propiedades["thumbnail"], fanart=Propiedades["fanart"], type=Propiedades["type"], category=Propiedades["category"], language=Propiedades["language"] ))
-                  else:
-                    folderchannels.append(Item(title=Propiedades["title"], channel=Propiedades["channel"],action="mainlist", thumbnail=Propiedades["thumbnail"], fanart=Propiedades["fanart"], type=Propiedades["type"], category=Propiedades["category"], language=Propiedades["language"] ))
-                    
-    if config.get_setting("personalchannel")=="true":
-        channelslist.append( Item( title=config.get_setting("personalchannelname") ,action="mainlist", channel="personal" ,thumbnail=config.get_setting("personalchannellogo"), language="" , category="F,S,D,A" , type="generic"  ))
-    if config.get_setting("personalchannel2")=="true":
-        channelslist.append( Item( title=config.get_setting("personalchannelname2") ,action="mainlist", channel="personal2" ,thumbnail=config.get_setting("personalchannellogo2"), language="" , category="F,S,D,A" , type="generic"  ))
-    if config.get_setting("personalchannel3")=="true":
-        channelslist.append( Item( title=config.get_setting("personalchannelname3") ,action="mainlist", channel="personal3" ,thumbnail=config.get_setting("personalchannellogo3"), language="" , category="F,S,D,A" , type="generic"  ))
-    if config.get_setting("personalchannel4")=="true":
-        channelslist.append( Item( title=config.get_setting("personalchannelname4") ,action="mainlist", channel="personal4" ,thumbnail=config.get_setting("personalchannellogo4"), language="" , category="F,S,D,A" , type="generic"  ))
-    if config.get_setting("personalchannel5")=="true":
-        channelslist.append( Item( title=config.get_setting("personalchannelname5") ,action="mainlist", channel="personal5" ,thumbnail=config.get_setting("personalchannellogo5"), language="" , category="F,S,D,A" , type="generic"  ))
+    logger.info("channelselector.getchanneltypes Encontrados:")
+    for channel_type in channel_types:
+        logger.info("channelselector.getchanneltypes channel_type="+channel_type)
 
-    folderchannels.sort(key=lambda item: item.title.lower().strip())
-    channelslist.extend(folderchannels)
+    # Ahora construye el itemlist ordenadamente
+    itemlist = []
 
-    for channel in channelslist:
-        if channel.thumbnail == "": channel.thumbnail = urlparse.urljoin(config.get_thumbnail_path(),channel.channel+".png")
-        channel.plot = channel.category.replace("VOS","Versión original subtitulada").replace("F","Películas").replace("S","Series").replace("D","Documentales").replace("A","Anime").replace(",",", ")
-        itemlist.append(channel)
+    dict_cat_lang = {'movie': config.get_localized_string(30122), 'serie': config.get_localized_string(30123),
+                     'anime': config.get_localized_string(30124), 'documentary': config.get_localized_string(30125),
+                     'vos': config.get_localized_string(30136), 'adult': config.get_localized_string(30126),
+                     'latino': config.get_localized_string(30127)}
+
+    itemlist.append(Item(title=config.get_localized_string(30121), channel="channelselector", action="filterchannels",
+                         category="all", thumbnail=urlparse.urljoin(get_thumbnail_path(preferred_thumb),
+                                                                    "thumb_canales_todos.png")))
+    logger.info("channelselector.getchanneltypes Ordenados:")
+    for channel_type in valid_types:
+        logger.info("channelselector.getchanneltypes channel_type="+channel_type)
+        if channel_type in channel_types:
+            title = channel_type
+            if channel_type in dict_cat_lang:
+                title = dict_cat_lang[channel_type]
+
+            itemlist.append(Item(title=title, channel="channelselector", action="filterchannels", category=channel_type,
+                                 thumbnail=urlparse.urljoin(get_thumbnail_path(preferred_thumb),
+                                                            "thumb_canales_"+channel_type+".png")))
 
     return itemlist
 
+
+def filterchannels(item,preferred_thumb=""):
+    logger.info("channelselector.filterchannels")
+
+    channelslist =[]
+
+    # Lee la lista de canales
+    channel_path = os.path.join( config.get_runtime_path() , "channels" , '*.xml' )
+    logger.info("channelselector.filterchannels channel_path="+channel_path)
+
+    channel_files = glob.glob(channel_path)
+    logger.info("channelselector.filterchannels channel_files encontrados "+str(len(channel_files)))
+
+    languages = ["all","es","en","it"]
+    channel_language = languages[int(config.get_setting("channel_language"))]
+    logger.info("channelselector.filterchannels channel_language="+channel_language)
+    if channel_language=="":
+        channel_language = "all"
+        logger.info("channelselector.filterchannels channel_language="+channel_language)
+
+    for index, channel in enumerate(channel_files):
+        logger.info("channelselector.filterchannels channel="+channel)
+        if channel.endswith(".xml"):
+
+            try:
+                channel_parameters = channeltools.get_channel_parameters(channel[:-4])
+                logger.info("channelselector.filterchannels channel_parameters="+repr(channel_parameters))
+
+                # Si prefiere el bannermenu y el canal lo tiene, cambia ahora de idea
+                if preferred_thumb=="bannermenu" and "bannermenu" in channel_parameters:
+                    channel_parameters["thumbnail"] = channel_parameters["bannermenu"]
+
+                # Se salta el canal si no está activo
+                if not channel_parameters["active"] == "true":
+                    continue
+
+                # Se salta el canal para adultos si el modo adultos está desactivado
+                if channel_parameters["adult"] == "true" and config.get_setting("adult_mode") != "true": 
+                    continue
+
+                # Se salta el canal si está en un idioma filtrado
+                if channel_language!="all" and channel_parameters["language"]!=config.get_setting("channel_language"):
+                    continue
+
+                # Se salta el canal si está en una categoria filtrado
+                if item.category!="all" and item.category not in channel_parameters["categories"]:
+                    continue
+
+                # Si ha llegado hasta aquí, lo añade
+                channelslist.append(Item(title=channel_parameters["title"], channel=channel_parameters["channel"], action="mainlist", thumbnail=channel_parameters["thumbnail"] , fanart=channel_parameters["fanart"], category=", ".join(channel_parameters["categories"])[:-2], language=channel_parameters["language"], type=channel_parameters["type"] ))
+            
+            except:
+                logger.info("Se ha producido un error al leer los datos del canal " + channel)
+                import traceback
+                logger.info(traceback.format_exc())
+           
+    channelslist.sort(key=lambda item: item.title.lower().strip())
+
+    if item.category=="all":
+        if config.get_setting("personalchannel5")=="true":
+            channelslist.insert( 0 , Item( title=config.get_setting("personalchannelname5") ,action="mainlist", channel="personal5" ,thumbnail=config.get_setting("personalchannellogo5") , type="generic"  ))
+        if config.get_setting("personalchannel4")=="true":
+            channelslist.insert( 0 , Item( title=config.get_setting("personalchannelname4") ,action="mainlist", channel="personal4" ,thumbnail=config.get_setting("personalchannellogo4") , type="generic"  ))
+        if config.get_setting("personalchannel3")=="true":
+            channelslist.insert( 0 , Item( title=config.get_setting("personalchannelname3") ,action="mainlist", channel="personal3" ,thumbnail=config.get_setting("personalchannellogo3") , type="generic"  ))
+        if config.get_setting("personalchannel2")=="true":
+            channelslist.insert( 0 , Item( title=config.get_setting("personalchannelname2") ,action="mainlist", channel="personal2" ,thumbnail=config.get_setting("personalchannellogo2") , type="generic"  ))
+        if config.get_setting("personalchannel")=="true":
+            channelslist.insert( 0 , Item( title=config.get_setting("personalchannelname")  ,action="mainlist", channel="personal"  ,thumbnail=config.get_setting("personalchannellogo") , type="generic"  ))
+
+        channel_parameters = channeltools.get_channel_parameters("tengourl")
+        # Si prefiere el bannermenu y el canal lo tiene, cambia ahora de idea
+        if preferred_thumb=="bannermenu" and "bannermenu" in channel_parameters:
+            channel_parameters["thumbnail"] = channel_parameters["bannermenu"]
+
+        channelslist.insert( 0 , Item( title="Tengo una URL"  ,action="mainlist", channel="tengourl" , thumbnail=channel_parameters["thumbnail"], type="generic"  ))
+
+    return channelslist
+
+
+def get_thumbnail_path(preferred_thumb=""):
+
+    WEB_PATH = ""
+    
+    if preferred_thumb=="":
+        thumbnail_type = config.get_setting("thumbnail_type")
+        if thumbnail_type=="":
+            thumbnail_type="2"
+
+        if thumbnail_type=="0":
+            WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/posters/"
+        elif thumbnail_type=="1":
+            WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/banners/"
+        elif thumbnail_type=="2":
+            WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/squares/"
+    else:
+        WEB_PATH = "http://media.tvalacarta.info/pelisalacarta/"+preferred_thumb+"/"
+
+    return WEB_PATH
